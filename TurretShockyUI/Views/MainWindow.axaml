@@ -1,0 +1,145 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TurretShockyUI.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="using:TurretShockyUI.Models"
+        mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="700"
+        x:Class="TurretShockyUI.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="TurretShocky"
+        Height="700"
+        Width="650">
+
+  <Design.DataContext>
+    <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+    <vm:DesignMainWindowViewModel/>
+  </Design.DataContext>
+
+  <ScrollViewer>
+    <StackPanel Margin="8" Orientation="Vertical" Spacing="5">
+      <TextBlock HorizontalAlignment="Center" FontSize="18" FontWeight="Bold">TurretShocky</TextBlock>
+      <TextBlock HorizontalAlignment="Center" FontSize="12">A better app for the Smart Shock Collar asset</TextBlock>
+      <Button HorizontalAlignment="Center" Margin="0,10,0,10" FontSize="12"
+              FontWeight="Bold" Click="Button_Click" Background="#00bf00"
+              IsEnabled="{Binding IsOscButtonEnabled}">
+        <Button.Content>
+          <StackPanel Orientation="Horizontal">
+            <PathIcon Data="{StaticResource power_regular}"
+                      Foreground="Firebrick" Margin="0,0,6,0"></PathIcon>
+            <TextBlock VerticalAlignment="Center">Start listening to OSC</TextBlock>
+          </StackPanel>
+        </Button.Content>
+      </Button>
+      <TextBlock HorizontalAlignment="Center" FontSize="15" FontWeight="Bold">Current Preferences</TextBlock>
+      <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+          <TextBlock FontSize="12" FontWeight="Bold" Margin="0,0,5,0">Mode:</TextBlock>
+          <TextBlock FontSize="12" Text="{Binding Prefs.FunType}"></TextBlock>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+          <TextBlock FontSize="12" FontWeight="Bold" Margin="0,0,5,0">Duration:</TextBlock>
+          <TextBlock FontSize="12" Text="{Binding Prefs.Duration, StringFormat=0.00}"></TextBlock>
+          <TextBlock FontSize="12" Text="s"></TextBlock>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+          <TextBlock FontSize="12" FontWeight="Bold" Margin="0,0,5,0">Cooldown:</TextBlock>
+          <TextBlock FontSize="12" Text="{Binding Prefs.CooldownTime, StringFormat=0.00}"></TextBlock>
+          <TextBlock FontSize="12" Text="s"></TextBlock>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+          <TextBlock FontSize="12" FontWeight="Bold" Margin="0,0,5,0">Min. Intensity:</TextBlock>
+          <TextBlock FontSize="12" Text="{Binding Prefs.MinIntensity, StringFormat=0}"></TextBlock>
+          <TextBlock FontSize="12" Text="%"></TextBlock>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+          <TextBlock FontSize="12" FontWeight="Bold" Margin="0,0,5,0">Max. Intensity:</TextBlock>
+          <TextBlock FontSize="12" Text="{Binding Prefs.MaxIntensity}"></TextBlock>
+          <TextBlock FontSize="12" Text="%"></TextBlock>
+        </StackPanel>
+      </WrapPanel>
+      <TextBlock HorizontalAlignment="Center" FontSize="15" FontWeight="Bold">Logs</TextBlock>
+      <ItemsControl ItemsSource="{Binding LogEntries}" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <StackPanel Orientation="Vertical"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Top"
+                        Height="260" Background="#222"/>
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <SelectableTextBlock Text="{Binding Message}" TextWrapping="Wrap" Margin="2">
+              <TextBlock.Foreground>
+                <SolidColorBrush Color="{Binding Color}" />
+              </TextBlock.Foreground>
+            </SelectableTextBlock>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <TextBlock HorizontalAlignment="Center" FontSize="15" FontWeight="Bold">Session stats</TextBlock>
+      <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+          <TextBlock FontSize="12" FontWeight="Bold" Margin="0,0,5,0">Number of touches:</TextBlock>
+          <TextBlock FontSize="12" Text="{Binding NbTouches}"></TextBlock>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+          <TextBlock FontSize="12" FontWeight="Bold" Margin="0,0,5,0">Times triggered:</TextBlock>
+          <TextBlock FontSize="12" Text="{Binding TimesTriggered}"></TextBlock>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+          <TextBlock FontSize="12" FontWeight="Bold" Margin="0,0,5,0">Number of shocks:</TextBlock>
+          <TextBlock FontSize="12" Text="{Binding NbShocks}"></TextBlock>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+          <TextBlock FontSize="12" FontWeight="Bold" Margin="0,0,5,0">Max. Intensity sent:</TextBlock>
+          <TextBlock FontSize="12" Text="{Binding MaxIntensity}"></TextBlock>
+        </StackPanel>
+        </WrapPanel>
+      <TextBlock HorizontalAlignment="Center" FontSize="15" FontWeight="Bold">Shockers</TextBlock>
+      <WrapPanel HorizontalAlignment="Center">
+        <Button Name="NewShockerBtn" Margin="2" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" Click="OnEditOrCreateShockerBtnClick">
+          <TextBlock>Add a shocker</TextBlock>
+        </Button>
+        <Button Margin="2" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" Click="OnConfigureApiBtnClick">
+          <StackPanel Orientation="Horizontal">
+            <PathIcon Data="{StaticResource options_regular}" Margin="0,0,6,0"></PathIcon>
+            <TextBlock VerticalAlignment="Center">Configure API</TextBlock>
+          </StackPanel>
+        </Button>
+      </WrapPanel>
+      <ItemsControl ItemsSource="{Binding Prefs.Shockers}" Padding="5">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Border Margin="5" BorderBrush="{DynamicResource TurretBlue}" BorderThickness="2" CornerRadius="3" Padding="5">
+              <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontWeight="Bold"/>
+                <CheckBox Name="{Binding Uid}" HorizontalAlignment="Center" IsChecked="{Binding IsEnabled}" FontSize="14" Click="ShockerEnableClick">Enabled</CheckBox>
+                <Button Name="{Binding Uid}" HorizontalAlignment="Center" Margin="5" Click="OnEditOrCreateShockerBtnClick">
+                  <StackPanel Orientation="Horizontal">
+                    <PathIcon Data="{StaticResource edit_regular}" Height="11" Margin="0,0,4,0"/>
+                    <TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold">Edit</TextBlock>
+                  </StackPanel>
+                </Button>
+                <Button Name="{Binding Uid}" HorizontalAlignment="Center" Background="Red" Click="DeleteShockerBtn">
+                  <StackPanel Orientation="Horizontal">
+                    <PathIcon Data="{StaticResource delete_regular}" Height="11" Margin="0,0,4,0"/>
+                    <TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold">Delete</TextBlock>
+                  </StackPanel>
+                </Button>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </ScrollViewer>
+</Window>
