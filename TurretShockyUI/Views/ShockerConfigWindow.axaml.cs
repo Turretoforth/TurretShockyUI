@@ -10,6 +10,8 @@ public partial class ShockerConfigWindow : Window
     private Shocker? _selectedShocker;
     private bool _isNew;
 
+    public ShockerConfigWindow() : this(true, null) { }
+
     public ShockerConfigWindow(bool isNew, Shocker? selectedShocker)
     {
         _isNew = isNew;

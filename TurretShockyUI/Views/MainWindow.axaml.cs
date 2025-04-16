@@ -30,7 +30,7 @@ namespace TurretShockyUI.Views
             base.OnClosing(e);
         }
 
-        private void Button_Click(object? sender, RoutedEventArgs e)
+        private void OnOscButtonClick(object? sender, RoutedEventArgs e)
         {
             try
             {
@@ -82,7 +82,7 @@ namespace TurretShockyUI.Views
             }, DispatcherPriority.MaxValue);
         }
 
-        VrcPrefs Prefs
+        ShockyPrefs Prefs
         {
             get
             {
@@ -297,6 +297,30 @@ namespace TurretShockyUI.Views
             osc.SendParameter("pishock/duration", Prefs.Duration / 10f);
 
             AddLog("Sent current preferences", Colors.LightYellow);
+        }
+
+        private void OnAppSettingsButtonClick(object? sender, RoutedEventArgs e)
+        {
+            // Open the App settings window
+            var appSettingsWindow = new AppSettingsWindow
+            {
+                DataContext = (DataContext as MainWindowViewModel)!.Prefs.App
+            };
+            appSettingsWindow.ShowDialog<AppSettingsWindowResult>(this)
+                .ContinueWith(t =>
+                {
+                    // We should always have a result, but just in case
+                    if (t.Result != null)
+                    {
+                        // Save the preferences
+                        Dispatcher.UIThread.Invoke(() =>
+                        {
+                            (DataContext as MainWindowViewModel)!.Prefs.App.WatchFiles = t.Result.WatchFiles;
+                            (DataContext as MainWindowViewModel)!.Prefs.App.FilesSettings = [.. t.Result.FilesSettings];
+                        });
+                    }
+                }
+            );
         }
 
         private void OnConfigureApiBtnClick(object? sender, RoutedEventArgs e)

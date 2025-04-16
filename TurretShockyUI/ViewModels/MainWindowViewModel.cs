@@ -8,7 +8,7 @@ namespace TurretShockyUI.ViewModels
     public partial class MainWindowViewModel : ViewModelBase
     {
         private ObservableCollection<LogEntry> _logEntries = [];
-        private VrcPrefs _prefs = new();
+        private ShockyPrefs _prefs = new();
         private bool _isOscButtonEnabled = true;
         private uint _nbShocks = 0;
         private uint _nbtouches = 0;
@@ -21,7 +21,7 @@ namespace TurretShockyUI.ViewModels
             set { SetProperty(ref _logEntries, value); }
         }
 
-        public VrcPrefs Prefs
+        public ShockyPrefs Prefs
         {
             get { return _prefs; }
             set { SetProperty(ref _prefs, value); }
@@ -60,7 +60,7 @@ namespace TurretShockyUI.ViewModels
         public MainWindowViewModel()
         {
             LogEntries = [];
-            Prefs = new VrcPrefs();
+            Prefs = new ShockyPrefs();
             IsOscButtonEnabled = true;
             NbShocks = 0;
             NbTouches = 0;
