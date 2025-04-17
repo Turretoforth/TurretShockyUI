@@ -3,9 +3,9 @@ using System.Collections.ObjectModel;
 
 namespace TurretShockyUI.Models
 {
-    public class FilesSettings : ObservableObject
+    public class FileSettings : ObservableObject
     {
-        public FilesSettings()
+        public FileSettings()
         {
             _isEnabled = false;
             _directoryPath = string.Empty;

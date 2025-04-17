@@ -6,6 +6,8 @@ namespace TurretShockyUI.Models
     {
         public bool WatchFiles { get; set; } = false;
 
-        public List<FilesSettings> FilesSettings { get; set; } = [];
+        public CooldownBehaviour CooldownBehaviour { get; set; } = CooldownBehaviour.Ignore;
+
+        public List<FileSettings> FilesSettings { get; set; } = [];
     }
 }

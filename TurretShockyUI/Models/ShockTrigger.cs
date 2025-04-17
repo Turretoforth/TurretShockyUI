@@ -6,8 +6,19 @@ namespace TurretShockyUI.Models
     {
         public ShockTrigger()
         {
+            _id = 0;
             _triggerText = string.Empty;
             _triggerMode = TriggerMode.Contains;
+        }
+
+        private uint _id;
+        public uint Id
+        {
+            get => _id;
+            set
+            {
+                SetProperty(ref _id, value);
+            }
         }
 
         private string _triggerText;

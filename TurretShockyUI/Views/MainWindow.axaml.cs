@@ -315,8 +315,13 @@ namespace TurretShockyUI.Views
                         // Save the preferences
                         Dispatcher.UIThread.Invoke(() =>
                         {
-                            (DataContext as MainWindowViewModel)!.Prefs.App.WatchFiles = t.Result.WatchFiles;
-                            (DataContext as MainWindowViewModel)!.Prefs.App.FilesSettings = [.. t.Result.FilesSettings];
+                            AppSettings appSettings = (DataContext as MainWindowViewModel)!.Prefs.App;
+
+                            appSettings.WatchFiles = t.Result.WatchFiles;
+                            appSettings.CooldownBehaviour = t.Result.CooldownBehaviour;
+                            appSettings.FilesSettings = [.. t.Result.FilesSettings];
+
+                            (DataContext as MainWindowViewModel)!.Prefs.App = appSettings;
                         });
                     }
                 }
