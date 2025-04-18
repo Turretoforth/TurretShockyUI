@@ -2,9 +2,9 @@
 
 namespace TurretShockyUI.Models
 {
-    public class ApiPrefs : ObservableObject
+    public class ApiSettings : ObservableObject
     {
-        public ApiPrefs()
+        public ApiSettings()
         {
             _apikey = string.Empty;
             _username = string.Empty;

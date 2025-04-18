@@ -7,7 +7,7 @@ namespace TurretShockyUI.ViewModels
         public DesignMainWindowViewModel()
         {
             LogEntries = [];
-            Prefs = new VrcPrefs(true);
+            Prefs = new ShockyPrefs(true);
             IsOscButtonEnabled = true;
             NbShocks = 0;
             NbTouches = 0;

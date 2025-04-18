@@ -1,9 +1,5 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
-using System;
-using System.Data;
 using TurretShockyUI.Models;
 
 namespace TurretShockyUI;
@@ -23,7 +19,7 @@ public partial class ApiConfigWindow : Window
 
     private void FillInitialValues()
     {
-        ApiPrefs? prefs = (DataContext as ApiPrefs);
+        ApiSettings? prefs = (DataContext as ApiSettings);
         if(prefs != null)
         {
             this.FindControl<TextBox>("ApiKey").Text = prefs.ApiKey;
@@ -41,7 +37,7 @@ public partial class ApiConfigWindow : Window
         Close(new ApiConfigWindowResult
         {
             ShouldSave = true,
-            ApiPrefs = new ApiPrefs
+            ApiPrefs = new ApiSettings
             {
                 ApiKey = this.FindControl<TextBox>("ApiKey").Text,
                 Username = this.FindControl<TextBox>("Username").Text

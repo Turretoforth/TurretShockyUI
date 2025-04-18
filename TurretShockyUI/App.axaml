@@ -10,7 +10,14 @@
   </Application.DataTemplates>
 
   <Application.Styles>
-    <FluentTheme />
+    <FluentTheme DensityStyle="Compact">
+      <FluentTheme.Palettes>
+        <!-- Palette for Light theme variant -->
+        <ColorPaletteResources x:Key="Light" Accent="#00b0ff" />
+        <!-- Palette for Dark theme variant -->
+        <ColorPaletteResources x:Key="Dark" Accent="#00b0ff" RegionColor="#222" />
+      </FluentTheme.Palettes>
+    </FluentTheme>
     <StyleInclude Source="avares://TurretShockyUI/Icons.axaml" />
     <Style Selector="PathIcon">
       <Setter Property="Width" Value="15"/>
@@ -24,7 +31,7 @@
       <Setter Property="Background" Value="{DynamicResource TurretBlue}"></Setter>
     </Style>
     <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="#222"/>
+      <Setter Property="Background" Value="Black"/>
     </Style>
     <Style Selector="Button:pointerover TextBlock">
       <Setter Property="Foreground" Value="White"/>

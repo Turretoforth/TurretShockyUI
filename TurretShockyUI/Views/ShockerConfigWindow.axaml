@@ -4,7 +4,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="390" d:DesignHeight="240"
         x:Class="TurretShockyUI.ShockerConfigWindow"
-        Title="ShockerConfigWindow"
+        Icon="/Assets/Shocky.ico"
+        Title="TurretShocky - Shocker config"
         Width="390" Height="240">
   <StackPanel Orientation="Vertical">
     <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10">

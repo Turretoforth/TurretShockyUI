@@ -1,0 +1,122 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:m="using:TurretShockyUI.Models"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="750"
+        x:Class="TurretShockyUI.AppSettingsWindow"
+        x:DataType="m:AppSettings"
+        Icon="/Assets/Shocky.ico"
+        Title="TurretShocky - Settings"
+        Width="500" Height="750">
+  <Window.Resources>
+  <ResourceDictionary>
+    <ResourceDictionary.ThemeDictionaries>
+      <ResourceDictionary x:Key='Light'>
+        <SolidColorBrush x:Key='BackgroundBrush'>#efefef</SolidColorBrush>
+        <SolidColorBrush x:Key='BorderBrush'>#111</SolidColorBrush>
+      </ResourceDictionary>
+      <ResourceDictionary x:Key='Dark'>
+        <SolidColorBrush x:Key='BackgroundBrush'>#222</SolidColorBrush>
+        <SolidColorBrush x:Key='BorderBrush'>#eee</SolidColorBrush>
+      </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+  </ResourceDictionary>
+  </Window.Resources>
+  <Design.DataContext>
+    <m:DesignAppSettings/>
+  </Design.DataContext>
+  <ScrollViewer Margin="8">
+    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+      <TextBlock HorizontalAlignment="Center" FontSize="18" FontWeight="Bold">Settings</TextBlock>
+      <TextBlock HorizontalAlignment="Center" FontSize="12">Any change is saved on closing this window</TextBlock>
+      <Border Margin="10" BorderThickness="1" BorderBrush="{DynamicResource TurretBlue}" CornerRadius="5" Width="450" Padding="5">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+          <TextBlock FontSize="16" FontWeight="Bold" HorizontalAlignment="Center">Text file triggers</TextBlock>
+          <CheckBox Name="WatchFiles" Margin="10" IsChecked="{Binding WatchFiles}" HorizontalAlignment="Center">
+            <TextBlock FontSize="13" Text="Enable text file triggers"></TextBlock>
+          </CheckBox>
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+            <TextBlock FontSize="13" Margin="0,0,5,0" VerticalAlignment="Center">Behaviour when on cooldown:</TextBlock>
+            <ComboBox SelectedIndex="{Binding Path=CooldownBehaviour}" FontSize="13">
+              <ComboBox.Items>
+                <ComboBoxItem Content="Ignore" />
+                <ComboBoxItem Content="Queue" />
+              </ComboBox.Items>
+            </ComboBox>
+          </StackPanel>
+          <TextBlock FontSize="13" FontWeight="Bold" HorizontalAlignment="Center">Files</TextBlock>
+          <ItemsControl Name="FilesSettingsControl" ItemsSource="{Binding FilesSettings}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border BorderBrush="{DynamicResource BorderBrush}" Background="{DynamicResource BackgroundBrush}" BorderThickness="1" CornerRadius="3" Margin="5" Padding="5">
+                  <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" Margin="5" Spacing="3">
+                      <TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold" Margin="0,0,5,0">Directory:</TextBlock>
+                      <TextBox VerticalAlignment="Center" FontSize="13" Width="250" Text="{Binding Path=DirectoryPath}" />
+                      <Button Click="BrowseForDirectoryBtn">
+                        <TextBlock FontSize="12" FontWeight="Bold">Browse...</TextBlock>
+                      </Button>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                      <TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold" Margin="0,0,5,0">File pattern:</TextBlock>
+                      <TextBox FontSize="13" Width="317" Text="{Binding Path=FilePattern}" />
+                    </StackPanel>
+                    <CheckBox Name="FileEnabled" Margin="5" IsChecked="{Binding IsEnabled}" HorizontalAlignment="Center">
+                      <TextBlock FontSize="13" Text="Enabled"></TextBlock>
+                    </CheckBox>
+                    <TextBlock FontSize="12" FontWeight="Bold" Margin="5" HorizontalAlignment="Center">Triggers</TextBlock>
+                    <ItemsControl Name="TriggersFileControl" ItemsSource="{Binding Path=ShockTriggers}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="3" Margin="5" Padding="5">
+                            <StackPanel Orientation="Vertical">
+                              <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+                                <TextBlock FontSize="12" FontWeight="Bold" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Center">Line trigger mode:</TextBlock>
+                                <ComboBox FontSize="13" SelectedIndex="{Binding Path=TriggerMode}">
+                                  <ComboBox.Items>
+                                    <ComboBoxItem Content="Contains"/>
+                                    <ComboBoxItem Content="Starts with" />
+                                    <ComboBoxItem Content="Ends with" />
+                                    <ComboBoxItem Content="Regex" />
+                                  </ComboBox.Items>
+                                </ComboBox>
+                              </StackPanel>
+                              <StackPanel Orientation="Horizontal" Margin="5" HorizontalAlignment="Center">
+                                <TextBlock FontSize="12" FontWeight="Bold" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Center">Trigger:</TextBlock>
+                                <TextBox FontSize="13" Width="300" Text="{Binding Path=TriggerText}" />
+                              </StackPanel>
+                              <Button Background="Red" HorizontalAlignment="Center" Click="RemoveTriggerBtn">
+                                <TextBlock FontSize="12" FontWeight="Bold">Remove</TextBlock>
+                              </Button>
+                            </StackPanel>
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                      <Button Background="Red" HorizontalAlignment="Center" Click="RemoveDirectoryBtn">
+                        <TextBlock FontSize="12" FontWeight="Bold">Remove directory</TextBlock>
+                      </Button>
+                      <Button HorizontalAlignment="Center" Click="AddTriggerBtn">
+                        <TextBlock FontSize="12" FontWeight="Bold">Add a trigger</TextBlock>
+                      </Button>
+                    </StackPanel>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Margin="5" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+          </ItemsControl>
+          <Button HorizontalAlignment="Center" Click="AddDirectoryBtn">
+            <TextBlock FontSize="12" FontWeight="Bold">Add a directory</TextBlock>
+          </Button>
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</Window>

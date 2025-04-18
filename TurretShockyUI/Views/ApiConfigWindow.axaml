@@ -2,10 +2,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="390" d:DesignHeight="240"
+        mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="220"
         x:Class="TurretShockyUI.ApiConfigWindow"
-        Title="ApiConfigWindow"
-        Width="390" Height="240">
+        Icon="/Assets/Shocky.ico"
+        Title="TurretShocky - Api config"
+        Width="450" Height="220">
   <StackPanel Orientation="Vertical">
     <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10">
       <Grid.RowDefinitions>
@@ -15,13 +16,13 @@
       </Grid.RowDefinitions>
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="100"/>
-        <ColumnDefinition Width="250"/>
+        <ColumnDefinition Width="310"/>
       </Grid.ColumnDefinitions>
       <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Margin="0,10" HorizontalAlignment="Center" FontSize="18" FontWeight="Bold">Api Configuration</TextBlock>
       <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,10" VerticalAlignment="Center">Api Key:</TextBlock>
-      <TextBox Name="ApiKey" Grid.Row="1" Grid.Column="1" Margin="0,10" VerticalAlignment="Center" Width="250"></TextBox>
+      <TextBox Name="ApiKey" Grid.Row="1" Grid.Column="1" Margin="0,10" VerticalAlignment="Center" Width="310"></TextBox>
       <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,10" VerticalAlignment="Center">Username:</TextBlock>
-      <TextBox Name="Username" Grid.Row="2" Grid.Column="1" Margin="0,10" VerticalAlignment="Center" Width="250"></TextBox>
+      <TextBox Name="Username" Grid.Row="2" Grid.Column="1" Margin="0,10" VerticalAlignment="Center" Width="310"></TextBox>
     </Grid>
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
       <Button Margin="5" Click="ResultSave">

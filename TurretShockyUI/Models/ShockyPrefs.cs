@@ -3,9 +3,9 @@ using System.Collections.ObjectModel;
 
 namespace TurretShockyUI.Models
 {
-    public class VrcPrefs : ObservableObject
+    public class ShockyPrefs : ObservableObject
     {
-        public VrcPrefs()
+        public ShockyPrefs()
         {
             _funType = (FunType)Preferences.Get("funtype", 2);
             _minIntensity = Preferences.Get("minintensity", 0);
@@ -13,9 +13,10 @@ namespace TurretShockyUI.Models
             _cooldownTime = Preferences.Get("cooldown", 10f);
             _duration = Preferences.Get("duration", 1);
             _shockers = Preferences.Get("shockers", new ObservableCollection<Shocker>())!;
-            _api = Preferences.Get("api", new ApiPrefs());
+            _api = Preferences.Get("api", new ApiSettings())!;
+            _app = Preferences.Get("app", new AppSettings())!;
         }
-        public VrcPrefs(bool fakeData)
+        public ShockyPrefs(bool fakeData)
         {
             _funType = FunType.Shock;
             _minIntensity = 10;
@@ -23,9 +24,11 @@ namespace TurretShockyUI.Models
             _cooldownTime = 12f;
             _duration = 1;
             _shockers = [
-                new() { Name="Test Shocker1", Code="A2B66ABF", IsEnabled=true},
+                new() { Name = "Test Shocker1", Code = "A2B66ABF", IsEnabled = true },
                 new() { Name = "Test Shocker2", Code = "C6B22ABF", IsEnabled = true }
             ];
+            _api = new();
+            _app = new();
         }
 
         private FunType _funType;
@@ -94,14 +97,25 @@ namespace TurretShockyUI.Models
             }
         }
 
-        private ApiPrefs _api;
-        public ApiPrefs Api
+        private ApiSettings _api;
+        public ApiSettings Api
         {
             get => _api;
             set
             {
                 Preferences.Set("api", value);
                 SetProperty(ref _api, value);
+            }
+        }
+
+        private AppSettings _app;
+        public AppSettings App
+        {
+            get => _app;
+            set
+            {
+                Preferences.Set("app", value);
+                SetProperty(ref _app, value);
             }
         }
     }

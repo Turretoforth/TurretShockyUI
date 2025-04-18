@@ -3,8 +3,10 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Threading;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TurretShockyUI.Models;
 using TurretShockyUI.ViewModels;
@@ -16,8 +18,10 @@ namespace TurretShockyUI.Views
     {
         readonly VRChatOSC osc = new();
         private bool inCooldown;
-        private readonly object lockObj = new();
-        private PiShockService piShockService = null;
+        private readonly object lockCooldown = new();
+        private PiShockService? piShockService;
+        private FileWatcherService? fileWatcherService;
+        private ConcurrentQueue<ShockTrigger> shockQueue = new();
         public MainWindow()
         {
             InitializeComponent();
@@ -30,13 +34,78 @@ namespace TurretShockyUI.Views
             base.OnClosing(e);
         }
 
-        private void Button_Click(object? sender, RoutedEventArgs e)
+        private void OnOscButtonClick(object? sender, RoutedEventArgs e)
         {
             try
             {
                 (DataContext as MainWindowViewModel)!.IsOscButtonEnabled = false;
+                if ((DataContext as MainWindowViewModel)!.Prefs.Api.ApiKey == string.Empty || (DataContext as MainWindowViewModel)!.Prefs.Api.Username == string.Empty)
+                {
+                    AddLog("Please configure the API key and username first", Colors.Red);
+                    (DataContext as MainWindowViewModel)!.IsOscButtonEnabled = true;
+                    return;
+                }
+                if ((DataContext as MainWindowViewModel)!.Prefs.Shockers.Count == 0)
+                {
+                    AddLog("Please configure at least one shocker first", Colors.Red);
+                    (DataContext as MainWindowViewModel)!.IsOscButtonEnabled = true;
+                    return;
+                }
+                if ((DataContext as MainWindowViewModel)!.Prefs.App.WatchFiles)
+                {
+                    fileWatcherService = new FileWatcherService();
+                    bool shouldQueue = (DataContext as MainWindowViewModel)!.Prefs.App.CooldownBehaviour == CooldownBehaviour.Queue;
+                    foreach (var fileSetting in (DataContext as MainWindowViewModel)!.Prefs.App.FilesSettings.Where(f => f.IsEnabled))
+                    {
+                        fileWatcherService.AddWatcher(new FileWatcherService.FileWatcher(
+                            fileSetting.DirectoryPath,
+                            fileSetting.FilePattern,
+                            [.. fileSetting.ShockTriggers],
+                            (line, trigger) =>
+                            {
+                                // Trigger the shock or handle cooldown
+                                Dispatcher.UIThread.Invoke(() =>
+                                {
+                                    bool cooldown = false;
+                                    lock (lockCooldown)
+                                    {
+                                        cooldown = inCooldown;
+                                    }
+
+                                    if (cooldown && !shouldQueue)
+                                    {
+                                        AddLog($"File watcher triggered, but in cooldown. Ignoring.", Colors.Orange);
+                                    }
+                                    else if (cooldown && shouldQueue)
+                                    {
+                                        AddLog($"File watcher triggered, but in cooldown. Queuing.", Colors.Orange);
+                                        shockQueue.Enqueue(trigger);
+                                    }
+                                    else
+                                    {
+                                        AddLog($"Triggered by file watcher: '{trigger.TriggerText}'. Simulating touch!", Colors.Firebrick);
+                                        SimulateTouch();
+                                    }
+                                }, DispatcherPriority.MaxValue);
+                            },
+                            (message, isError) =>
+                            {
+                                if (isError)
+                                {
+                                    AddLog($"File watcher error: {message}", Colors.Red);
+                                }
+                                else
+                                {
+                                    AddLog($"File watcher: {message}", Colors.LightBlue);
+                                }
+                            }
+                        ));
+                    }
+                    fileWatcherService.StartWatching();
+                }
+
                 osc.Connect();
-                osc.OnMessage = ((e, m) =>
+                osc.OnMessage += ((e, m) =>
                 {
                     try
                     {
@@ -82,7 +151,7 @@ namespace TurretShockyUI.Views
             }, DispatcherPriority.MaxValue);
         }
 
-        VrcPrefs Prefs
+        ShockyPrefs Prefs
         {
             get
             {
@@ -146,7 +215,7 @@ namespace TurretShockyUI.Views
             else if (m.Path.Equals("/cooldownbool"))
             {
                 // Cooldown from OSC is switched to true when the spinning animation is started so it indicates we have to shock
-                lock (lockObj)
+                lock (lockCooldown)
                 {
                     inCooldown = m.GetValue<bool>();
                 }
@@ -184,12 +253,12 @@ namespace TurretShockyUI.Views
                     AddLog($"Cooldown started for {cooldownTime:0.00}s", Colors.LightGreen);
                     Task.Run(() =>
                     {
-                        lock (lockObj)
+                        lock (lockCooldown)
                         {
                             inCooldown = true;
                         }
                         Task.Delay((int)Math.Round(cooldownTime * 1000)).Wait();
-                        lock (lockObj)
+                        lock (lockCooldown)
                         {
                             inCooldown = false;
                         }
@@ -209,7 +278,7 @@ namespace TurretShockyUI.Views
                     {
                         piShockService ??= new PiShockService(Prefs.Api.ApiKey, Prefs.Api.Username);
                     });
-                    piShockService.DoPiShockOperations(funType, duration, randomIntensity, [.. activatedDevices.Select(s => s.Code)]).ContinueWith(r =>
+                    piShockService!.DoPiShockOperations(funType, duration, randomIntensity, [.. activatedDevices.Select(s => s.Code)]).ContinueWith(r =>
                     {
                         foreach (var shocker in r.Result)
                         {
@@ -235,11 +304,18 @@ namespace TurretShockyUI.Views
                 {
                     // Should not happen, but just in case, we reset the cooldown
                     AddLog($"Trigger ignored, currently in Idle mode. Resetting cooldown.", Colors.Yellow);
-                    lock (lockObj)
+                    lock (lockCooldown)
                     {
                         inCooldown = false;
                     }
                     osc.SendParameter("pishock/cooldownbool", false);
+                }
+                else if (!inCooldown && funType != FunType.Idle && shockQueue.TryDequeue(out ShockTrigger trigger))
+                {
+                    // React to any queued triggers
+                    AddLog($"Processing queued trigger: '{trigger.TriggerText}'. Simulating touch!", Colors.Firebrick);
+                    Thread.Sleep(1000); // Wait a bit before simulating the touch to be sure to trigger it
+                    SimulateTouch();
                 }
                 // We ignore the false value from OSC, because it is sent back sometimes when we change the value
             }
@@ -282,6 +358,13 @@ namespace TurretShockyUI.Views
             }
         }
 
+        private void SimulateTouch()
+        {
+            osc.SendParameter("pishock/TouchPoint_0", true);
+            Thread.Sleep(1500); // Simulate a touch for long enough to trigger the shock
+            osc.SendParameter("pishock/TouchPoint_0", false);
+        }
+
         private void SendSavedPrefs(VRChatOSC osc)
         {
             osc.SendParameter("pishock/codeon", true);
@@ -297,6 +380,35 @@ namespace TurretShockyUI.Views
             osc.SendParameter("pishock/duration", Prefs.Duration / 10f);
 
             AddLog("Sent current preferences", Colors.LightYellow);
+        }
+
+        private void OnAppSettingsButtonClick(object? sender, RoutedEventArgs e)
+        {
+            // Open the App settings window
+            var appSettingsWindow = new AppSettingsWindow
+            {
+                DataContext = (DataContext as MainWindowViewModel)!.Prefs.App
+            };
+            appSettingsWindow.ShowDialog<AppSettingsWindowResult>(this)
+                .ContinueWith(t =>
+                {
+                    // We should always have a result, but just in case
+                    if (t.Result != null)
+                    {
+                        // Save the preferences
+                        Dispatcher.UIThread.Invoke(() =>
+                        {
+                            AppSettings appSettings = (DataContext as MainWindowViewModel)!.Prefs.App;
+
+                            appSettings.WatchFiles = t.Result.WatchFiles;
+                            appSettings.CooldownBehaviour = t.Result.CooldownBehaviour;
+                            appSettings.FilesSettings = [.. t.Result.FilesSettings];
+
+                            (DataContext as MainWindowViewModel)!.Prefs.App = appSettings;
+                        });
+                    }
+                }
+            );
         }
 
         private void OnConfigureApiBtnClick(object? sender, RoutedEventArgs e)
