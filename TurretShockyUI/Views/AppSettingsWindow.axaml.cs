@@ -27,6 +27,7 @@ public partial class AppSettingsWindow : Window
             Close(new AppSettingsWindowResult
             {
                 WatchFiles = WatchFiles.IsChecked ?? false,
+                CooldownBehaviour = (DataContext as AppSettings)?.CooldownBehaviour ?? CooldownBehaviour.Ignore,
                 FilesSettings = (DataContext as AppSettings)?.FilesSettings.ToList() ?? []
             });
             e.Cancel = true; // Prevents default closing behavior
