@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TurretShocky.Models;
+using TurretShocky.Services;
 using TurretShocky.ViewModels;
 using VRChatOSCLib;
 
@@ -26,6 +27,8 @@ namespace TurretShocky.Views
         {
             InitializeComponent();
             Preferences.Initialize();
+            // TODO: Start the update checker
+
         }
 
         protected override void OnClosing(WindowClosingEventArgs e)
