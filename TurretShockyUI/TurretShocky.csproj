@@ -6,10 +6,18 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
+    <ApplicationIcon>Assets\Shocky.ico</ApplicationIcon>
+    <AssemblyName>TurretShocky</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\Shocky.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,8 +34,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="VRChatOSCLib">
-      <HintPath>..\..\..\_Libs\VRChatOSCLib.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\VRChatOSCLib\VRChatOSCLib\VRChatOSCLib.csproj" />
   </ItemGroup>
 </Project>

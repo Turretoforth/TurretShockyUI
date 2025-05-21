@@ -1,9 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using System;
-using TurretShockyUI.Models;
+using TurretShocky.Models;
 
-namespace TurretShockyUI;
+namespace TurretShocky;
 
 public partial class ShockerConfigWindow : Window
 {

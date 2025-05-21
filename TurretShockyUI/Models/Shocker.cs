@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 
-namespace TurretShockyUI.Models
+namespace TurretShocky.Models
 {
     public class Shocker : ObservableObject
     {

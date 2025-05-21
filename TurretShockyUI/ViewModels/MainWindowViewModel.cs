@@ -1,9 +1,9 @@
 ﻿using Avalonia.Media;
 using System;
 using System.Collections.ObjectModel;
-using TurretShockyUI.Models;
+using TurretShocky.Models;
 
-namespace TurretShockyUI.ViewModels
+namespace TurretShocky.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
     {

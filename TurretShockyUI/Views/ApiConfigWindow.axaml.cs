@@ -1,8 +1,8 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using TurretShockyUI.Models;
+using TurretShocky.Models;
 
-namespace TurretShockyUI;
+namespace TurretShocky;
 
 public partial class ApiConfigWindow : Window
 {

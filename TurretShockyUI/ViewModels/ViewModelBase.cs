@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace TurretShockyUI.ViewModels
+namespace TurretShocky.ViewModels
 {
     public class ViewModelBase : ObservableObject
     {

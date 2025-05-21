@@ -1,14 +1,14 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:m="using:TurretShockyUI.Models"
+        xmlns:m="using:TurretShocky.Models"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="750"
-        x:Class="TurretShockyUI.AppSettingsWindow"
+        mc:Ignorable="d" d:DesignWidth="550" d:DesignHeight="750"
+        x:Class="TurretShocky.AppSettingsWindow"
         x:DataType="m:AppSettings"
         Icon="/Assets/Shocky.ico"
         Title="TurretShocky - Settings"
-        Width="500" Height="750">
+        Width="550" Height="750">
   <Window.Resources>
   <ResourceDictionary>
     <ResourceDictionary.ThemeDictionaries>
@@ -30,6 +30,14 @@
     <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
       <TextBlock HorizontalAlignment="Center" FontSize="18" FontWeight="Bold">Settings</TextBlock>
       <TextBlock HorizontalAlignment="Center" FontSize="12">Any change is saved on closing this window</TextBlock>
+      <Border Margin="10" BorderThickness="1" BorderBrush="{DynamicResource TurretBlue}" CornerRadius="5" Width="450" Padding="5">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+          <TextBlock FontSize="16" FontWeight="Bold" HorizontalAlignment="Center">General</TextBlock>
+          <CheckBox Name="ExtraOscMessages" Margin="10" IsChecked="{Binding ShowExtraOscMessages}" HorizontalAlignment="Center">
+            <TextBlock FontSize="13" Text="Show extra OSC messages received by the program"></TextBlock>
+          </CheckBox>
+        </StackPanel>
+      </Border>
       <Border Margin="10" BorderThickness="1" BorderBrush="{DynamicResource TurretBlue}" CornerRadius="5" Width="450" Padding="5">
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
           <TextBlock FontSize="16" FontWeight="Bold" HorizontalAlignment="Center">Text file triggers</TextBlock>

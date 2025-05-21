@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using TurretShockyUI.Models;
+using TurretShocky.Models;
 
-namespace TurretShockyUI
+namespace TurretShocky
 {
     public class PiShockService(string apiKey, string username)
     {

@@ -3,7 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="220"
-        x:Class="TurretShockyUI.ApiConfigWindow"
+        x:Class="TurretShocky.ApiConfigWindow"
         Icon="/Assets/Shocky.ico"
         Title="TurretShocky - Api config"
         Width="450" Height="220">

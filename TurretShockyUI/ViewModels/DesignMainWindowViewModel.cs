@@ -1,6 +1,6 @@
-﻿using TurretShockyUI.Models;
+﻿using TurretShocky.Models;
 
-namespace TurretShockyUI.ViewModels
+namespace TurretShocky.ViewModels
 {
     public partial class DesignMainWindowViewModel : MainWindowViewModel
     {

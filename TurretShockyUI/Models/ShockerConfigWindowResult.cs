@@ -1,4 +1,4 @@
-﻿namespace TurretShockyUI.Models
+﻿namespace TurretShocky.Models
 {
     public class ShockerConfigWindowResult
     {

@@ -1,0 +1,3 @@
+[submodule "VRChatOSCLib"]
+	path = VRChatOSCLib
+	url = https://github.com/Turretoforth/VRChatOSCLib

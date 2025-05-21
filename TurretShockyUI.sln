@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197 d17.13
+VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TurretShockyUI", "TurretShockyUI\TurretShockyUI.csproj", "{2E576A48-7B6F-490B-827C-31A14F774762}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TurretShocky", "TurretShockyUI\TurretShocky.csproj", "{2E576A48-7B6F-490B-827C-31A14F774762}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VRChatOSCLib", "VRChatOSCLib\VRChatOSCLib\VRChatOSCLib.csproj", "{7839A467-3A0E-CAB8-209E-EC21F8776CC5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{2E576A48-7B6F-490B-827C-31A14F774762}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2E576A48-7B6F-490B-827C-31A14F774762}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2E576A48-7B6F-490B-827C-31A14F774762}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7839A467-3A0E-CAB8-209E-EC21F8776CC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7839A467-3A0E-CAB8-209E-EC21F8776CC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7839A467-3A0E-CAB8-209E-EC21F8776CC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7839A467-3A0E-CAB8-209E-EC21F8776CC5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

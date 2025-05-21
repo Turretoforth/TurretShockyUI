@@ -3,7 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="390" d:DesignHeight="240"
-        x:Class="TurretShockyUI.ShockerConfigWindow"
+        x:Class="TurretShocky.ShockerConfigWindow"
         Icon="/Assets/Shocky.ico"
         Title="TurretShocky - Shocker config"
         Width="390" Height="240">

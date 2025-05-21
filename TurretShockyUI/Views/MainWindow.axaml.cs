@@ -8,11 +8,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TurretShockyUI.Models;
-using TurretShockyUI.ViewModels;
+using TurretShocky.Models;
+using TurretShocky.ViewModels;
 using VRChatOSCLib;
 
-namespace TurretShockyUI.Views
+namespace TurretShocky.Views
 {
     public partial class MainWindow : Window
     {
@@ -170,6 +170,12 @@ namespace TurretShockyUI.Views
             ];
         private void HandleOSCMessage(VRCMessage m)
         {
+            bool hasExtraOscMessages = false;
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                hasExtraOscMessages = Prefs.App.ShowExtraOscMessages;
+            }, DispatcherPriority.MaxValue);
+
             // Changed mode
             if (m.Path.Equals("/funtype"))
             {
@@ -231,6 +237,7 @@ namespace TurretShockyUI.Views
                     maxIntensity = Prefs.MaxIntensity;
                     duration = Prefs.Duration;
                     activatedDevices = [.. Prefs.Shockers.Where(s => s.IsEnabled)];
+                    hasExtraOscMessages = Prefs.App.ShowExtraOscMessages;
                 }, DispatcherPriority.MaxValue);
                 if (inCooldown && funType != FunType.Idle)
                 {
@@ -354,7 +361,10 @@ namespace TurretShockyUI.Views
             }
             else
             {
-                AddLog($"Received: Path={m.Path} Type={m.Type} Address={m.Address} IsParameter={m.IsParameter} Value={m.GetValue()}", Colors.LightGreen);
+                if (hasExtraOscMessages)
+                {
+                    AddLog($"Received: Path={m.Path} Type={m.Type} Address={m.Address} IsParameter={m.IsParameter} Value={m.GetValue()}", Colors.LightGreen);
+                }
             }
         }
 

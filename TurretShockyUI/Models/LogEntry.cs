@@ -1,7 +1,7 @@
 ﻿using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace TurretShockyUI.Models
+namespace TurretShocky.Models
 {
     public class LogEntry : ObservableObject
     {

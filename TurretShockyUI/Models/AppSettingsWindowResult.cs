@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace TurretShockyUI.Models
+namespace TurretShocky.Models
 {
     public class AppSettingsWindowResult
     {

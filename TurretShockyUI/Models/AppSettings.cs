@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 
-namespace TurretShockyUI.Models
+namespace TurretShocky.Models
 {
     public class AppSettings : ObservableObject
     {
@@ -36,6 +36,16 @@ namespace TurretShockyUI.Models
                 SetProperty(ref _filesSettings, value);
             }
         }
+
+        private bool _showExtraOscMessages = false;
+        public bool ShowExtraOscMessages
+        {
+            get => _showExtraOscMessages;
+            set
+            {
+                SetProperty(ref _showExtraOscMessages, value);
+            }
+        }
     }
 
     public enum CooldownBehaviour
@@ -63,6 +73,7 @@ namespace TurretShockyUI.Models
                     ]
                 }
             ];
+            ShowExtraOscMessages = false;
         }
     }
 }

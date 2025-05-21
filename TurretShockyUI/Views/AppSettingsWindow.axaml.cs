@@ -3,9 +3,9 @@ using Avalonia.Platform.Storage;
 using Avalonia.VisualTree;
 using System.Collections.ObjectModel;
 using System.Linq;
-using TurretShockyUI.Models;
+using TurretShocky.Models;
 
-namespace TurretShockyUI;
+namespace TurretShocky;
 
 public partial class AppSettingsWindow : Window
 {

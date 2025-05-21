@@ -4,10 +4,10 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
-using TurretShockyUI.ViewModels;
-using TurretShockyUI.Views;
+using TurretShocky.ViewModels;
+using TurretShocky.Views;
 
-namespace TurretShockyUI
+namespace TurretShocky
 {
     public partial class App : Application
     {

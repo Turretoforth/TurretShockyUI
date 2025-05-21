@@ -1,7 +1,7 @@
 ﻿using System;
 using Avalonia;
 
-namespace TurretShockyUI
+namespace TurretShocky
 {
     internal sealed class Program
     {

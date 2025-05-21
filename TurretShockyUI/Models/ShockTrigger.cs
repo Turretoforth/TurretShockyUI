@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace TurretShockyUI.Models
+namespace TurretShocky.Models
 {
     public class ShockTrigger : ObservableObject
     {

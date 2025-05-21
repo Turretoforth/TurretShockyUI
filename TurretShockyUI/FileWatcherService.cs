@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TurretShockyUI.Models;
+using TurretShocky.Models;
 
-namespace TurretShockyUI
+namespace TurretShocky
 {
     public class FileWatcherService
     {

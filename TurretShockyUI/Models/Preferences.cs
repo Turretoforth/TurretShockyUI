@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text.Json;
 
-namespace TurretShockyUI.Models
+namespace TurretShocky.Models
 {
     public static class Preferences
     {
