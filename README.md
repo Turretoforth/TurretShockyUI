@@ -12,8 +12,31 @@ It has an UI powered by AvaloniaUI and a number of additional functionalities:
 Preview:\
 ![image](https://github.com/user-attachments/assets/ac55e687-3caa-47a5-a800-3322d949fc00)
 
-### How to use
-(soon)
+### First use
+#### Get your api key and the shocker(s) code
+In order for the program to be able to send commands to your PiShock, you'll need to get an api key and create a code for each shocker you want to use.
+
+To get the api key, connect to your PiShock account and go to the [account screen](https://pishock.com/#/account). You'll find a "Generate Api Key" button. Click on it and save the key generated somewhere safe, <ins>*as you won't be able to see it again*</ins>.\
+
+For the shocker(s), go to the [control page](https://pishock.com/#/control) and click the share button on the shocker you want to add. Create a new code, then copy and save the code displayed, <ins>*as you won't be able to see it again*</ins>. (Note that it will be replaced by your username once a command has been sent through) \
+
+![image](https://github.com/user-attachments/assets/7d5e4706-09d0-4b0c-8bba-c942fcfdb123)
+
+
+#### Configure the Api
+Open the Api Configuration window on the program with the "Configure API" button and enter your PiShock api key and username.\
+
+![image](https://github.com/user-attachments/assets/cae821d0-fb15-4f9f-9216-fea53a20bf6b)
+
+#### Add your shockers
+Click the "Add a shocker" and enter the code you got previously. Enter whatever you want for the name as it is just for you to differentiate between several shockers.\
+*Fun fact! This works with any PiShock code, so you can shock a friend through this* \
+Don't forget to enable it afterwards.
+
+![image](https://github.com/user-attachments/assets/31f51181-456b-4e42-b872-697f5ec52f91)
+
+#### Start OSC and have fun
+Everything is now configured, you only have to get into your avatar and click the "Start listening to OSC" to start.
 
 ### How to contribute
 (soon)
