@@ -5,6 +5,7 @@ using Avalonia.Threading;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,13 +23,49 @@ namespace TurretShocky.Views
         private readonly object lockCooldown = new();
         private PiShockService? piShockService;
         private FileWatcherService? fileWatcherService;
+        private UpdateService updateService = new("Turretoforth", "TurretShockyUI", "TurretShocky.zip");
         private ConcurrentQueue<ShockTrigger> shockQueue = new();
         public MainWindow()
         {
             InitializeComponent();
             Preferences.Initialize();
-            // TODO: Start the update checker
+            if (!Design.IsDesignMode)
+            {
+                StartUpdateCheckLoop();
+            }
+        }
 
+        private void StartUpdateCheckLoop()
+        {
+            Task.Run(async () =>
+            {
+                while (true)
+                {
+                    try
+                    {
+                        if (updateService != null && await updateService.CheckForUpdates())
+                        {
+                            Dispatcher.UIThread.Invoke(() =>
+                            {
+                                (DataContext as MainWindowViewModel)!.HasUpdateAvailable = true;
+                                (DataContext as MainWindowViewModel)!.UpdateVersion = updateService.LatestStableVersion;
+                            }, DispatcherPriority.MaxValue);
+                        }
+                        else
+                        {
+                            Dispatcher.UIThread.Invoke(() =>
+                            {
+                                (DataContext as MainWindowViewModel)!.HasUpdateAvailable = false;
+                            }, DispatcherPriority.MaxValue);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        AddLog($"Error checking for update: {ex.Message}", Colors.Red);
+                    }
+                    await Task.Delay(TimeSpan.FromMinutes(30)); // Check every 30 minutes
+                }
+            });
         }
 
         protected override void OnClosing(WindowClosingEventArgs e)
@@ -514,6 +551,47 @@ namespace TurretShocky.Views
                     }
                 }
             );
+        }
+
+        private void InitiateUpdateClickBtn(object? sender, RoutedEventArgs e)
+        {
+            if ((DataContext as MainWindowViewModel)!.HasUpdateAvailable)
+            {
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        await updateService.DownloadUpdateToCurrentFolder("TurretShocky_update.zip");
+                        AddLog("Downloaded update! Extracting updater...", Colors.Green);
+                        // Extract the updater
+                        using ZipArchive zip = ZipFile.OpenRead("TurretShock_update.zip");
+                        foreach (ZipArchiveEntry entry in zip.Entries)
+                        {
+                            if (entry.Name == "Updater.exe")
+                            {
+                                string targetPath = System.IO.Path.Combine(AppContext.BaseDirectory, entry.Name);
+                                entry.ExtractToFile(targetPath, true);
+                                AddLog($"Extracted updater! The application will update in a few seconds.", Colors.Green);
+                                await Task.Delay(3000); // Wait 3 seconds before applying the update
+                                                        // Start the updater
+                                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                                {
+                                    FileName = "Updater.exe",
+                                    UseShellExecute = true,
+                                    WorkingDirectory = AppContext.BaseDirectory
+                                });
+
+                                // Close the main application
+                                Environment.Exit(0);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        AddLog($"Error downloading update: {ex.Message}", Colors.Red);
+                    }
+                });
+            }
         }
     }
 }
