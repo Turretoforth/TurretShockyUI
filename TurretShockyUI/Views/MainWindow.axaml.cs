@@ -23,8 +23,8 @@ namespace TurretShocky.Views
         private readonly object lockCooldown = new();
         private PiShockService? piShockService;
         private FileWatcherService? fileWatcherService;
-        private UpdateService updateService = new("Turretoforth", "TurretShockyUI", "TurretShocky.zip");
-        private ConcurrentQueue<ShockTrigger> shockQueue = new();
+        private readonly UpdateService updateService = new("Turretoforth", "TurretShockyUI", "TurretShocky.zip");
+        private readonly ConcurrentQueue<ShockTrigger> shockQueue = new();
         public MainWindow()
         {
             InitializeComponent();
@@ -557,33 +557,41 @@ namespace TurretShocky.Views
         {
             if ((DataContext as MainWindowViewModel)!.HasUpdateAvailable)
             {
+                string updateToDownload = (DataContext as MainWindowViewModel)!.UpdateVersion ?? "latest";
                 Task.Run(async () =>
                 {
                     try
                     {
+                        AddLog("Downloading update " + updateToDownload + "...", Colors.Green);
                         await updateService.DownloadUpdateToCurrentFolder("TurretShocky_update.zip");
                         AddLog("Downloaded update! Extracting updater...", Colors.Green);
                         // Extract the updater
-                        using ZipArchive zip = ZipFile.OpenRead("TurretShock_update.zip");
+                        using ZipArchive zip = ZipFile.OpenRead("TurretShocky_update.zip");
+                        bool foundUpdater = false;
                         foreach (ZipArchiveEntry entry in zip.Entries)
                         {
                             if (entry.Name == "Updater.exe")
                             {
+                                foundUpdater = true;
                                 string targetPath = System.IO.Path.Combine(AppContext.BaseDirectory, entry.Name);
                                 entry.ExtractToFile(targetPath, true);
                                 AddLog($"Extracted updater! The application will update in a few seconds.", Colors.Green);
                                 await Task.Delay(3000); // Wait 3 seconds before applying the update
-                                                        // Start the updater
+                                // Start the updater
                                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                                 {
                                     FileName = "Updater.exe",
-                                    UseShellExecute = true,
-                                    WorkingDirectory = AppContext.BaseDirectory
+                                    UseShellExecute = true
                                 });
 
                                 // Close the main application
                                 Environment.Exit(0);
                             }
+                        }
+                        if (!foundUpdater)
+                        {
+                            AddLog("Updater not found in the downloaded archive. Please install it manually or check the Github for more information.", Colors.Yellow);
+                            return;
                         }
                     }
                     catch (Exception ex)

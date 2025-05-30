@@ -88,6 +88,8 @@ public partial class MainView : UserControl
                 };
                 Process.Start(startInfo);
 
+                await Task.Delay(3000); // Wait a bit to ensure the main app starts
+
                 // Close the updater application
                 Environment.Exit(0);
             }

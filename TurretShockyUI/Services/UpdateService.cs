@@ -36,7 +36,7 @@ namespace TurretShocky.Services
             this.owner = owner;
             this.repo = repo;
             this.expectedZipName = expectedZipName;
-            _currentVer = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
+            _currentVer = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("TurretShocky/" + _currentVer);
         }
 
@@ -44,6 +44,11 @@ namespace TurretShocky.Services
         {
             GithubReleaseInfo? latestRelease = await GetLatestRelease() ?? throw new InvalidOperationException($"Latest release not found");
             string latestVersion = latestRelease.Tag_Name.Replace("v", ""); // Remove the 'v' prefix from the version string
+            // If the version has only 3 parts, append a '0' to make sure the version comparison works correctly
+            if (latestVersion.Count(c => c == '.') == 2)
+            {
+                latestVersion += ".0"; // Ensure it has 4 parts
+            }
 
             // Handle '*' in expectedZipName as a wildcard
             GithubAsset? githubAsset = null;
@@ -101,7 +106,7 @@ namespace TurretShocky.Services
             }
             else
             {
-                throw new HttpRequestException($"Failed to download latest release: {assetResponse.StatusCode} - {await assetResponse.Content.ReadAsStringAsync()}");
+                throw new HttpRequestException($"Failed to download latest release: {assetResponse.StatusCode}");
             }
         }
     }
