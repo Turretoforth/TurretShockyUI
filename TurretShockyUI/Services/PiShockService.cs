@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TurretShocky.Models;
 
-namespace TurretShocky
+namespace TurretShocky.Services
 {
     public class PiShockService(string apiKey, string username)
     {

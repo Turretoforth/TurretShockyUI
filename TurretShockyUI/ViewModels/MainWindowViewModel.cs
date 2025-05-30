@@ -1,6 +1,7 @@
 ﻿using Avalonia.Media;
 using System;
 using System.Collections.ObjectModel;
+using System.Reflection;
 using TurretShocky.Models;
 
 namespace TurretShocky.ViewModels
@@ -14,6 +15,9 @@ namespace TurretShocky.ViewModels
         private uint _nbtouches = 0;
         private uint _timesTriggered = 0;
         private uint _maxIntensity = 0;
+        private bool _hasUpdateAvailable = false;
+        private string _updateVersion = "0.0.0";
+        private string? _currentVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
 
         public ObservableCollection<LogEntry> LogEntries
         {
@@ -57,6 +61,24 @@ namespace TurretShocky.ViewModels
             set { SetProperty(ref _maxIntensity, value); }
         }
 
+        public bool HasUpdateAvailable
+        {
+            get { return _hasUpdateAvailable; }
+            set { SetProperty(ref _hasUpdateAvailable, value); }
+        }
+
+        public string UpdateVersion
+        {
+            get { return _updateVersion; }
+            set { SetProperty(ref _updateVersion, value); }
+        }
+
+        public string? CurrentVersion
+        {
+            get { return _currentVersion; }
+            set { SetProperty(ref _currentVersion, value); }
+        }
+
         public MainWindowViewModel()
         {
             LogEntries = [];
@@ -66,6 +88,9 @@ namespace TurretShocky.ViewModels
             NbTouches = 0;
             TimesTriggered = 0;
             MaxIntensity = 0;
+            HasUpdateAvailable = false;
+            UpdateVersion = "0.0.0";
+            CurrentVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
         }
 
         public void AddLog(string message, Color color)

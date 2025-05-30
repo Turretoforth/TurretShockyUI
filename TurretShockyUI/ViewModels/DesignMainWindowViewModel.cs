@@ -13,6 +13,9 @@ namespace TurretShocky.ViewModels
             NbTouches = 0;
             TimesTriggered = 0;
             MaxIntensity = 0;
+            HasUpdateAvailable = true;
+            UpdateVersion = "1.2.3.0";
+            CurrentVersion = "1.0.0.0"; // Design-time version, can be set to any value
         }
     }
 }

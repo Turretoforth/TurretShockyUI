@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TurretShocky.Models;
 
-namespace TurretShocky
+namespace TurretShocky.Services
 {
     public class FileWatcherService
     {

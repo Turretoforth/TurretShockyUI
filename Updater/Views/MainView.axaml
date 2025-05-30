@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Updater.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="250"
+             x:Class="Updater.Views.MainView"
+             x:DataType="vm:MainViewModel"
+             Height="250" Width="600">
+  <Design.DataContext>
+    <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+    <vm:MainViewModel />
+  </Design.DataContext>
+  <Grid RowSpacing="20" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="15">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+    <TextBlock Grid.Row="0" Text="{Binding WarningMessage}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap"/>
+    <TextBlock Grid.Row="1" Text="{Binding UpdateStatusMessage}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap"/>
+  </Grid>
+</UserControl>

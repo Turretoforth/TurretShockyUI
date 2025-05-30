@@ -5,10 +5,12 @@ using Avalonia.Threading;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TurretShocky.Models;
+using TurretShocky.Services;
 using TurretShocky.ViewModels;
 using VRChatOSCLib;
 
@@ -21,11 +23,49 @@ namespace TurretShocky.Views
         private readonly object lockCooldown = new();
         private PiShockService? piShockService;
         private FileWatcherService? fileWatcherService;
-        private ConcurrentQueue<ShockTrigger> shockQueue = new();
+        private readonly UpdateService updateService = new("Turretoforth", "TurretShockyUI", "TurretShocky.zip");
+        private readonly ConcurrentQueue<ShockTrigger> shockQueue = new();
         public MainWindow()
         {
             InitializeComponent();
             Preferences.Initialize();
+            if (!Design.IsDesignMode)
+            {
+                StartUpdateCheckLoop();
+            }
+        }
+
+        private void StartUpdateCheckLoop()
+        {
+            Task.Run(async () =>
+            {
+                while (true)
+                {
+                    try
+                    {
+                        if (updateService != null && await updateService.CheckForUpdates())
+                        {
+                            Dispatcher.UIThread.Invoke(() =>
+                            {
+                                (DataContext as MainWindowViewModel)!.HasUpdateAvailable = true;
+                                (DataContext as MainWindowViewModel)!.UpdateVersion = updateService.LatestStableVersion;
+                            }, DispatcherPriority.MaxValue);
+                        }
+                        else
+                        {
+                            Dispatcher.UIThread.Invoke(() =>
+                            {
+                                (DataContext as MainWindowViewModel)!.HasUpdateAvailable = false;
+                            }, DispatcherPriority.MaxValue);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        AddLog($"Error checking for update: {ex.Message}", Colors.Red);
+                    }
+                    await Task.Delay(TimeSpan.FromMinutes(30)); // Check every 30 minutes
+                }
+            });
         }
 
         protected override void OnClosing(WindowClosingEventArgs e)
@@ -511,6 +551,55 @@ namespace TurretShocky.Views
                     }
                 }
             );
+        }
+
+        private void InitiateUpdateClickBtn(object? sender, RoutedEventArgs e)
+        {
+            if ((DataContext as MainWindowViewModel)!.HasUpdateAvailable)
+            {
+                string updateToDownload = (DataContext as MainWindowViewModel)!.UpdateVersion ?? "latest";
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        AddLog("Downloading update " + updateToDownload + "...", Colors.Green);
+                        await updateService.DownloadUpdateToCurrentFolder("TurretShocky_update.zip");
+                        AddLog("Downloaded update! Extracting updater...", Colors.Green);
+                        // Extract the updater
+                        using ZipArchive zip = ZipFile.OpenRead("TurretShocky_update.zip");
+                        bool foundUpdater = false;
+                        foreach (ZipArchiveEntry entry in zip.Entries)
+                        {
+                            if (entry.Name == "Updater.exe")
+                            {
+                                foundUpdater = true;
+                                string targetPath = System.IO.Path.Combine(AppContext.BaseDirectory, entry.Name);
+                                entry.ExtractToFile(targetPath, true);
+                                AddLog($"Extracted updater! The application will update in a few seconds.", Colors.Green);
+                                await Task.Delay(3000); // Wait 3 seconds before applying the update
+                                // Start the updater
+                                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                                {
+                                    FileName = "Updater.exe",
+                                    UseShellExecute = true
+                                });
+
+                                // Close the main application
+                                Environment.Exit(0);
+                            }
+                        }
+                        if (!foundUpdater)
+                        {
+                            AddLog("Updater not found in the downloaded archive. Please install it manually or check the Github for more information.", Colors.Yellow);
+                            return;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        AddLog($"Error downloading update: {ex.Message}", Colors.Red);
+                    }
+                });
+            }
         }
     }
 }

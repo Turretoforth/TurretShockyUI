@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TurretShocky", "TurretShock
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VRChatOSCLib", "VRChatOSCLib\VRChatOSCLib\VRChatOSCLib.csproj", "{7839A467-3A0E-CAB8-209E-EC21F8776CC5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpdaterCore", "Updater\UpdaterCore.csproj", "{ED343F03-4390-3BCA-479A-106C6AB7F588}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Updater.Desktop", "Updater.Desktop\Updater.Desktop.csproj", "{15E6728C-392D-0834-A52D-324AE7668C8C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{7839A467-3A0E-CAB8-209E-EC21F8776CC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7839A467-3A0E-CAB8-209E-EC21F8776CC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7839A467-3A0E-CAB8-209E-EC21F8776CC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED343F03-4390-3BCA-479A-106C6AB7F588}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED343F03-4390-3BCA-479A-106C6AB7F588}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED343F03-4390-3BCA-479A-106C6AB7F588}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED343F03-4390-3BCA-479A-106C6AB7F588}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15E6728C-392D-0834-A52D-324AE7668C8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15E6728C-392D-0834-A52D-324AE7668C8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15E6728C-392D-0834-A52D-324AE7668C8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15E6728C-392D-0834-A52D-324AE7668C8C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
