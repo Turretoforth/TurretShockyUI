@@ -10,6 +10,7 @@ namespace TurretShocky.Models
             _uid = Guid.NewGuid();
             _name = string.Empty;
             _code = string.Empty;
+            _type = ShockerType.PiShock;
             _isEnabled = false;
         }
 
@@ -43,6 +44,16 @@ namespace TurretShocky.Models
             }
         }
 
+        private ShockerType _type;
+        public ShockerType Type
+        {
+            get => _type;
+            set
+            {
+                SetProperty(ref _type, value);
+            }
+        }
+
         private bool _isEnabled;
         public bool IsEnabled
         {
@@ -52,5 +63,11 @@ namespace TurretShocky.Models
                 SetProperty(ref _isEnabled, value);
             }
         }
+    }
+
+    public enum ShockerType
+    {
+        PiShock,
+        OpenShock,
     }
 }

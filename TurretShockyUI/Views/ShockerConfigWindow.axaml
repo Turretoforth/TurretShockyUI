@@ -2,14 +2,15 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="390" d:DesignHeight="240"
+        mc:Ignorable="d" d:DesignWidth="390" d:DesignHeight="250"
         x:Class="TurretShocky.ShockerConfigWindow"
         Icon="/Assets/Shocky.ico"
         Title="TurretShocky - Shocker config"
-        Width="390" Height="240">
+        Width="390" Height="250">
   <StackPanel Orientation="Vertical">
     <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10">
       <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
         <RowDefinition Height="Auto"/>
         <RowDefinition Height="Auto"/>
         <RowDefinition Height="Auto"/>
@@ -18,11 +19,15 @@
         <ColumnDefinition Width="100"/>
         <ColumnDefinition Width="250"/>
       </Grid.ColumnDefinitions>
-      <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Margin="0,10" HorizontalAlignment="Center" FontSize="18" FontWeight="Bold">Shocker Configuration</TextBlock>
-      <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,10" VerticalAlignment="Center">Name:</TextBlock>
-      <TextBox Name="Name" Grid.Row="1" Grid.Column="1" Margin="0,10" VerticalAlignment="Center" Width="250"></TextBox>
-      <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,10" VerticalAlignment="Center">Code:</TextBlock>
-      <TextBox Name="Code" Grid.Row="2" Grid.Column="1" Margin="0,10" VerticalAlignment="Center" Width="250"></TextBox>
+      <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Margin="0,5" HorizontalAlignment="Center" FontSize="18" FontWeight="Bold">Shocker Configuration</TextBlock>
+      <StackPanel Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" Orientation="Horizontal" Spacing="20">
+        <RadioButton GroupName="ShockType" Name="PiShockType" Margin="0,10" HorizontalAlignment="Right" VerticalAlignment="Center">PiShock</RadioButton>
+        <RadioButton GroupName="ShockType" Name="OpenShockType" Margin="0,10" HorizontalAlignment="Center" VerticalAlignment="Center">OpenShock</RadioButton>
+      </StackPanel>
+      <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,10" VerticalAlignment="Center">Name:</TextBlock>
+      <TextBox Name="Name" Grid.Row="2" Grid.Column="1" Margin="0,10" VerticalAlignment="Center" Width="250"></TextBox>
+      <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,10" VerticalAlignment="Center">Code:</TextBlock>
+      <TextBox Name="Code" Grid.Row="3" Grid.Column="1" Margin="0,10" VerticalAlignment="Center" Width="250"></TextBox>
     </Grid>
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
       <Button Margin="5" Click="ResultSave">

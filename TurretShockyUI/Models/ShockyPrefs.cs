@@ -24,8 +24,9 @@ namespace TurretShocky.Models
             _cooldownTime = 12f;
             _duration = 1;
             _shockers = [
-                new() { Name = "Test Shocker1", Code = "A2B66ABF", IsEnabled = true },
-                new() { Name = "Test Shocker2", Code = "C6B22ABF", IsEnabled = true }
+                new() { Name = "Test Shocker1", Code = "A2B66ABF", IsEnabled = true, Type = ShockerType.PiShock },
+                new() { Name = "Test Shocker2", Code = "C6B22ABF", IsEnabled = true, Type = ShockerType.PiShock },
+                new() { Name = "Test Shocker3", Code = "D4B88ABF", IsEnabled = true, Type = ShockerType.OpenShock }
             ];
             _api = new();
             _app = new();
