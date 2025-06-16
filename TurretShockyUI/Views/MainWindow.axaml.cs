@@ -29,10 +29,21 @@ namespace TurretShocky.Views
         {
             InitializeComponent();
             Preferences.Initialize();
+
             if (!Design.IsDesignMode)
             {
                 StartUpdateCheckLoop();
             }
+        }
+
+        protected override void OnOpened(EventArgs e)
+        {
+            // Initialize OpenShockService
+            string openshockApiToken = (DataContext as MainWindowViewModel)!.Prefs.Api.OpenShockApiToken;
+            string openshockBaseApi = (DataContext as MainWindowViewModel)!.Prefs.Api.OpenShockBaseApi;
+            OpenShockService.Initialize(openshockBaseApi, openshockApiToken);
+
+            base.OnOpened(e);
         }
 
         private void StartUpdateCheckLoop()
@@ -478,6 +489,11 @@ namespace TurretShocky.Views
                         Dispatcher.UIThread.Invoke(() =>
                         {
                             (DataContext as MainWindowViewModel)!.Prefs.Api = t.Result.ApiPrefs ?? new();
+                            // Reinitialize the OpenShockService with the new (potential) API settings
+                            OpenShockService.Initialize(
+                                (DataContext as MainWindowViewModel)!.Prefs.Api.OpenShockBaseApi,
+                                (DataContext as MainWindowViewModel)!.Prefs.Api.OpenShockApiToken
+                            );
                         });
                     }
                 }

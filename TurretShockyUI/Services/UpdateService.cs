@@ -36,7 +36,7 @@ namespace TurretShocky.Services
             this.owner = owner;
             this.repo = repo;
             this.expectedZipName = expectedZipName;
-            _currentVer = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
+            _currentVer = Utils.GetCurrentVersion();
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("TurretShocky/" + _currentVer);
         }
 

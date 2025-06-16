@@ -146,6 +146,7 @@
             <Border Margin="5" BorderBrush="{DynamicResource TurretBlue}" BorderThickness="2" CornerRadius="3" Padding="8">
               <StackPanel Orientation="Vertical" VerticalAlignment="Center">
                 <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontWeight="Bold"/>
+                <TextBlock Text="{Binding Type}" HorizontalAlignment="Center" FontSize="11" FontWeight="Bold"></TextBlock>
                 <CheckBox Name="{Binding Uid}" HorizontalAlignment="Center" IsChecked="{Binding IsEnabled}" FontSize="14" Click="ShockerEnableClick">Enabled</CheckBox>
                 <Button Name="{Binding Uid}" HorizontalAlignment="Center" Margin="5" Click="OnEditOrCreateShockerBtnClick">
                   <StackPanel Orientation="Horizontal">

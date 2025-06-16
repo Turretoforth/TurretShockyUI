@@ -13,34 +13,28 @@ namespace TurretShocky.Services
     public class OpenShockService
     {
         private static OpenShockService? _currentInstance = null;
-        private static readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(6) };
+        private static HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(6) };
         private static readonly JsonSerializerOptions _jsonSerializerOptions = new()
         {
             PropertyNameCaseInsensitive = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
-        internal OpenShockService(string baseApi, string apiToken)
+        private OpenShockService(string baseApi, string apiToken)
         {
-            string? _currentVer = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("TurretShocky/" + _currentVer);
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("TurretShocky/" + Utils.GetCurrentVersion());
             _httpClient.DefaultRequestHeaders.Add("Open-Shock-Token", apiToken);
             _httpClient.BaseAddress = new Uri(baseApi.TrimEnd('/'));
         }
 
         public static void Initialize(string baseApi, string apiKey)
         {
-            if (_currentInstance == null)
+            if (_httpClient != null)
             {
-                _currentInstance = new OpenShockService(baseApi, apiKey);
+                _httpClient.Dispose(); // Dispose the old instance if it exists
+                _httpClient = new() { Timeout = TimeSpan.FromSeconds(6) };
             }
-            else
-            {
-                // If already initialized, update the properties
-                _httpClient.DefaultRequestHeaders.Remove("Open-Shock-Token");
-                _httpClient.DefaultRequestHeaders.Add("Open-Shock-Token", apiKey);
-                _httpClient.BaseAddress = new Uri(baseApi.TrimEnd('/'));
-            }
+            _currentInstance = new OpenShockService(baseApi, apiKey);
         }
 
         public static async Task<List<OpenShocker>> GetSharedShockers()
