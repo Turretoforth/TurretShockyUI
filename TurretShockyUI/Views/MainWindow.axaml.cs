@@ -336,16 +336,35 @@ namespace TurretShocky.Views
                     {
                         piShockService ??= new PiShockService(Prefs.Api.ApiKey, Prefs.Api.Username);
                     });
-                    piShockService!.DoPiShockOperations(funType, duration, randomIntensity, [.. activatedDevices.Select(s => s.Code)]).ContinueWith(r =>
+                    if (activatedDevices.Any(s => s.Type == ShockerType.PiShock))
                     {
-                        foreach (var shocker in r.Result)
+                        AddLog($"Triggering {activatedDevices.Count(s => s.Type == ShockerType.PiShock)} PiShock device(s)", Colors.Yellow);
+                        piShockService!.DoPiShockOperations(funType, duration, randomIntensity, [.. activatedDevices.Where(s => s.Type == ShockerType.PiShock).Select(s => s.Code)])
+                            .ContinueWith(r =>
                         {
-                            if (!shocker.Value.Success)
+                            foreach (var shocker in r.Result)
                             {
-                                AddLog($"Error triggering shocker {shocker.Key}: {shocker.Value.Message}", Colors.Red);
+                                if (!shocker.Value.Success)
+                                {
+                                    AddLog($"Error triggering PiShock {shocker.Key}: {shocker.Value.Message}", Colors.Red);
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
+                    if (activatedDevices.Any(s => s.Type == ShockerType.OpenShock))
+                    {
+                        AddLog($"Triggering {activatedDevices.Count(s => s.Type == ShockerType.OpenShock)} OpenShock device(s)", Colors.Yellow);
+                        OpenShockService.SendShockerCommand([.. activatedDevices.Where(s => s.Type == ShockerType.OpenShock).Select(s => s.Code)],
+                            funType, randomIntensity, duration * 1000) // For OpenShock, duration is in milliseconds
+                        .ContinueWith(r =>
+                        {
+                            if (r.IsFaulted)
+                            {
+                                AddLog($"Error triggering OpenShock: {r.Exception?.Message}", Colors.Red);
+                            }
+                        });
+                    }
+
                     Dispatcher.UIThread.Invoke(() =>
                     {
                         if (funType == FunType.Shock)

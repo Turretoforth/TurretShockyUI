@@ -102,7 +102,7 @@ namespace TurretShocky.Services
                     Duration = duration,
                     Exclusive = false
                 })],
-                CustomName = "TurretShocky Command"
+                CustomName = "TurretShocky"
             };
 
             StringContent content = new(JsonSerializer.Serialize(controlMessage, _jsonSerializerOptions), Encoding.UTF8, "application/json");
