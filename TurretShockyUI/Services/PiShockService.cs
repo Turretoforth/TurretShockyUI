@@ -11,13 +11,17 @@ namespace TurretShocky.Services
     {
         private readonly string _apiKey = apiKey;
         private readonly string _username = username;
-        private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(6) };
+        private readonly HttpClient _httpClient = new()
+        {
+            // Sometimes the API can be slow, so we give it time (Although, the shock *usually* go through even if the timeout is reached)
+            Timeout = TimeSpan.FromSeconds(8)
+        };
 
         public async Task<Dictionary<string, OperationResult>> DoPiShockOperations(FunType type, int nbSeconds, int intensity, List<string> shockerCodes)
         {
             var result = new Dictionary<string, OperationResult>();
             ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5 };
-            await Parallel.ForEachAsync(shockerCodes,parallelOptions, async (shockerCode, cancellationToken) =>
+            await Parallel.ForEachAsync(shockerCodes, parallelOptions, async (shockerCode, cancellationToken) =>
             {
                 var shockerResult = await DoPiShockOperation(type, nbSeconds, intensity, shockerCode);
                 result.Add(shockerCode, shockerResult);
