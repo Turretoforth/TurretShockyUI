@@ -587,6 +587,55 @@ namespace TurretShocky.Views
                 }
             );
         }
+        private void OnTestShockerBtnClick(object? sender, RoutedEventArgs e)
+        {
+            // Get the shocker to test
+            Shocker? selectedShocker = (DataContext as MainWindowViewModel)!.Prefs.Shockers.FirstOrDefault(s => s.Uid.ToString() == (sender as Button)!.Name);
+            if (selectedShocker == null)
+            {
+                AddLog("Couldn't find shocker to test? (Report this)", Colors.Red);
+                return;
+            }
+            AddLog($"Triggering a test [1 second - 80%] vibration on {selectedShocker.Name}", Colors.Yellow);
+
+            try
+            {
+                if (selectedShocker.Type == ShockerType.PiShock)
+                {
+                    piShockService ??= new PiShockService(Prefs.Api.ApiKey, Prefs.Api.Username);
+                    piShockService.DoPiShockOperations(FunType.Vibration, 1, 80, [selectedShocker.Code])
+                        .ContinueWith(r =>
+                        {
+                            foreach (var shocker in r.Result)
+                            {
+                                if (!shocker.Value.Success)
+                                {
+                                    AddLog($"Error triggering PiShock {shocker.Key}: {shocker.Value.Message}", Colors.Red);
+                                }
+                            }
+                        });
+                }
+                else if (selectedShocker.Type == ShockerType.OpenShock)
+                {
+                    OpenShockService.SendShockerCommand([selectedShocker.Code], FunType.Vibration, 80, 1000)
+                        .ContinueWith(r =>
+                        {
+                            if (r.IsFaulted)
+                            {
+                                AddLog($"Error triggering OpenShock: {r.Exception?.Message}", Colors.Red);
+                            }
+                        });
+                }
+                else
+                {
+                    AddLog($"Unknown shocker type: {selectedShocker.Type}", Colors.Red);
+                }
+            }
+            catch (Exception ex)
+            {
+                AddLog($"Error testing shocker: {ex.Message}", Colors.Red);
+            }
+        }
 
         private void InitiateUpdateClickBtn(object? sender, RoutedEventArgs e)
         {

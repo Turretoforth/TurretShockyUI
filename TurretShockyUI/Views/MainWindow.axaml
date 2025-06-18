@@ -144,16 +144,24 @@
         <ItemsControl.ItemTemplate>
           <DataTemplate>
             <Border Margin="5" BorderBrush="{DynamicResource TurretBlue}" BorderThickness="2" CornerRadius="3" Padding="8">
-              <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+              <StackPanel Orientation="Vertical" VerticalAlignment="Center" Spacing="2">
                 <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontWeight="Bold"/>
                 <TextBlock Text="{Binding Type}" HorizontalAlignment="Center" FontSize="11" FontWeight="Bold"></TextBlock>
                 <CheckBox Name="{Binding Uid}" HorizontalAlignment="Center" IsChecked="{Binding IsEnabled}" FontSize="14" Click="ShockerEnableClick">Enabled</CheckBox>
-                <Button Name="{Binding Uid}" HorizontalAlignment="Center" Margin="5" Click="OnEditOrCreateShockerBtnClick">
-                  <StackPanel Orientation="Horizontal">
-                    <PathIcon Data="{StaticResource edit_regular}" Height="11" Margin="0,0,4,0"/>
-                    <TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold">Edit</TextBlock>
-                  </StackPanel>
-                </Button>
+                <StackPanel Orientation="Horizontal" Spacing="2">
+                  <Button Name="{Binding Uid}" HorizontalAlignment="Center" Click="OnTestShockerBtnClick">
+                    <StackPanel Orientation="Horizontal">
+                      <PathIcon Data="{StaticResource phone_vibrate_regular}" Height="11" Margin="0,0,4,0"/>
+                      <TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold">Test</TextBlock>
+                    </StackPanel>
+                  </Button>
+                  <Button Name="{Binding Uid}" HorizontalAlignment="Center" Click="OnEditOrCreateShockerBtnClick">
+                    <StackPanel Orientation="Horizontal">
+                      <PathIcon Data="{StaticResource edit_regular}" Height="11" Margin="0,0,4,0"/>
+                      <TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold">Edit</TextBlock>
+                    </StackPanel>
+                  </Button>
+                </StackPanel>
                 <Button Name="{Binding Uid}" HorizontalAlignment="Center" Background="Red" Click="DeleteShockerBtn">
                   <StackPanel Orientation="Horizontal">
                     <PathIcon Data="{StaticResource delete_regular}" Height="11" Margin="0,0,4,0"/>

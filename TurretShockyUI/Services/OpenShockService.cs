@@ -187,8 +187,8 @@ namespace TurretShocky.Services
 
     sealed class Limits
     {
-        public int Intensity { get; set; }
-        public int Duration { get; set; }
+        public int? Intensity { get; set; }
+        public int? Duration { get; set; }
     }
 
     sealed class Permissions
