@@ -174,12 +174,19 @@ public partial class ShockerConfigWindow : Window
     {
         try
         {
-            if (OSShockerSelect.SelectedItem is ComboBoxItem selectedItem && selectedItem.Name != null && selectedItem.Name != "default")
+            ComboBoxItem? selectedItem = OSShockerSelect.SelectedItem as ComboBoxItem;
+            if (selectedItem?.Name != null && selectedItem.Name != "default")
             {
                 Guid selectedId = Guid.Parse(selectedItem.Name);
                 OpenShocker? selectedShocker = _openShockers.Find(s => s.Id == selectedId);
                 Code.Text = selectedShocker != default ? selectedShocker.Id.ToString() : string.Empty;
                 Name.Text = selectedShocker != default ? selectedShocker.Name : string.Empty;
+            }
+            else if (_selectedShocker != null && (selectedItem?.Name == null || selectedItem.Name == "default"))
+            {
+                // If no shocker is selected, revert to the original selected shocker if there was one
+                Code.Text = _selectedShocker.Code;
+                Name.Text = _selectedShocker.Name;
             }
             else
             {
