@@ -20,27 +20,43 @@ public partial class ApiConfigWindow : Window
     private void FillInitialValues()
     {
         ApiSettings? prefs = (DataContext as ApiSettings);
-        if(prefs != null)
+        if (prefs != null)
         {
-            this.FindControl<TextBox>("ApiKey").Text = prefs.ApiKey;
-            this.FindControl<TextBox>("Username").Text = prefs.Username;
+            PiShockApiKey.Text = prefs.ApiKey;
+            PiShockUsername.Text = prefs.Username;
+            OpenShockApiToken.Text = prefs.OpenShockApiToken;
+            OpenShockBaseApi.Text = prefs.OpenShockBaseApi;
         }
         else
         {
-            this.FindControl<TextBox>("ApiKey").Text = string.Empty;
-            this.FindControl<TextBox>("Username").Text = string.Empty;
+            PiShockApiKey.Text = string.Empty;
+            PiShockUsername.Text = string.Empty;
+            OpenShockApiToken.Text = string.Empty;
+            OpenShockBaseApi.Text = "https://api.openshock.app"; // Default value, can be overridden
         }
     }
 
     public void ResultSave(object? sender, RoutedEventArgs e)
     {
+        bool hasFilledOpenShock = !string.IsNullOrWhiteSpace(OpenShockApiToken.Text) && !string.IsNullOrWhiteSpace(OpenShockBaseApi.Text);
+        bool hasFilledPiShock = !string.IsNullOrWhiteSpace(PiShockApiKey.Text) && !string.IsNullOrWhiteSpace(PiShockUsername.Text);
+        if (!hasFilledOpenShock && !hasFilledPiShock)
+        {
+            // Show a simple error message
+            ErrorDialog errorDialog = new("Api Key and Username needs to be filled for at least one of the APIs");
+            errorDialog.ShowDialog(this);
+            return;
+        }
+
         Close(new ApiConfigWindowResult
         {
             ShouldSave = true,
             ApiPrefs = new ApiSettings
             {
-                ApiKey = this.FindControl<TextBox>("ApiKey").Text,
-                Username = this.FindControl<TextBox>("Username").Text
+                ApiKey = PiShockApiKey.Text ?? string.Empty,
+                Username = PiShockUsername.Text ?? string.Empty,
+                OpenShockApiToken = OpenShockApiToken.Text ?? string.Empty,
+                OpenShockBaseApi = OpenShockBaseApi.Text ?? "https://api.openshock.app" // Default value, can be overridden
             }
         });
     }

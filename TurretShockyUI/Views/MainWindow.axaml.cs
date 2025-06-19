@@ -23,16 +23,28 @@ namespace TurretShocky.Views
         private readonly object lockCooldown = new();
         private PiShockService? piShockService;
         private FileWatcherService? fileWatcherService;
+        //private readonly UpdateService updateService = new("vrcx-team", "VRCX", "VRCX*.zip");
         private readonly UpdateService updateService = new("Turretoforth", "TurretShockyUI", "TurretShocky.zip");
         private readonly ConcurrentQueue<ShockTrigger> shockQueue = new();
         public MainWindow()
         {
             InitializeComponent();
             Preferences.Initialize();
+
             if (!Design.IsDesignMode)
             {
                 StartUpdateCheckLoop();
             }
+        }
+
+        protected override void OnOpened(EventArgs e)
+        {
+            // Initialize OpenShockService
+            string openshockApiToken = (DataContext as MainWindowViewModel)!.Prefs.Api.OpenShockApiToken;
+            string openshockBaseApi = (DataContext as MainWindowViewModel)!.Prefs.Api.OpenShockBaseApi;
+            OpenShockService.Initialize(openshockBaseApi, openshockApiToken);
+
+            base.OnOpened(e);
         }
 
         private void StartUpdateCheckLoop()
@@ -325,16 +337,35 @@ namespace TurretShocky.Views
                     {
                         piShockService ??= new PiShockService(Prefs.Api.ApiKey, Prefs.Api.Username);
                     });
-                    piShockService!.DoPiShockOperations(funType, duration, randomIntensity, [.. activatedDevices.Select(s => s.Code)]).ContinueWith(r =>
+                    if (activatedDevices.Any(s => s.Type == ShockerType.PiShock))
                     {
-                        foreach (var shocker in r.Result)
+                        AddLog($"Triggering {activatedDevices.Count(s => s.Type == ShockerType.PiShock)} PiShock device(s)", Colors.Yellow);
+                        piShockService!.DoPiShockOperations(funType, duration, randomIntensity, [.. activatedDevices.Where(s => s.Type == ShockerType.PiShock).Select(s => s.Code)])
+                            .ContinueWith(r =>
                         {
-                            if (!shocker.Value.Success)
+                            foreach (var shocker in r.Result)
                             {
-                                AddLog($"Error triggering shocker {shocker.Key}: {shocker.Value.Message}", Colors.Red);
+                                if (!shocker.Value.Success)
+                                {
+                                    AddLog($"Error triggering PiShock {shocker.Key}: {shocker.Value.Message}", Colors.Red);
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
+                    if (activatedDevices.Any(s => s.Type == ShockerType.OpenShock))
+                    {
+                        AddLog($"Triggering {activatedDevices.Count(s => s.Type == ShockerType.OpenShock)} OpenShock device(s)", Colors.Yellow);
+                        OpenShockService.SendShockerCommand([.. activatedDevices.Where(s => s.Type == ShockerType.OpenShock).Select(s => s.Code)],
+                            funType, randomIntensity, duration * 1000) // For OpenShock, duration is in milliseconds
+                        .ContinueWith(r =>
+                        {
+                            if (r.IsFaulted)
+                            {
+                                AddLog($"Error triggering OpenShock: {r.Exception?.Message}", Colors.Red);
+                            }
+                        });
+                    }
+
                     Dispatcher.UIThread.Invoke(() =>
                     {
                         if (funType == FunType.Shock)
@@ -478,6 +509,11 @@ namespace TurretShocky.Views
                         Dispatcher.UIThread.Invoke(() =>
                         {
                             (DataContext as MainWindowViewModel)!.Prefs.Api = t.Result.ApiPrefs ?? new();
+                            // Reinitialize the OpenShockService with the new (potential) API settings
+                            OpenShockService.Initialize(
+                                (DataContext as MainWindowViewModel)!.Prefs.Api.OpenShockBaseApi,
+                                (DataContext as MainWindowViewModel)!.Prefs.Api.OpenShockApiToken
+                            );
                         });
                     }
                 }
@@ -552,12 +588,90 @@ namespace TurretShocky.Views
                 }
             );
         }
+        private void OnTestShockerBtnClick(object? sender, RoutedEventArgs e)
+        {
+            // Get the shocker to test
+            Shocker? selectedShocker = (DataContext as MainWindowViewModel)!.Prefs.Shockers.FirstOrDefault(s => s.Uid.ToString() == (sender as Button)!.Name);
+            if (selectedShocker == null)
+            {
+                AddLog("Couldn't find shocker to test? (Report this)", Colors.Red);
+                return;
+            }
+            AddLog($"Triggering a test [1 second - 80%] vibration on {selectedShocker.Name}", Colors.Yellow);
 
-        private void InitiateUpdateClickBtn(object? sender, RoutedEventArgs e)
+            try
+            {
+                if (selectedShocker.Type == ShockerType.PiShock)
+                {
+                    piShockService ??= new PiShockService(Prefs.Api.ApiKey, Prefs.Api.Username);
+                    piShockService.DoPiShockOperations(FunType.Vibration, 1, 80, [selectedShocker.Code])
+                        .ContinueWith(r =>
+                        {
+                            foreach (var shocker in r.Result)
+                            {
+                                if (!shocker.Value.Success)
+                                {
+                                    AddLog($"Error triggering PiShock {shocker.Key}: {shocker.Value.Message}", Colors.Red);
+                                }
+                            }
+                        });
+                }
+                else if (selectedShocker.Type == ShockerType.OpenShock)
+                {
+                    OpenShockService.SendShockerCommand([selectedShocker.Code], FunType.Vibration, 80, 1000)
+                        .ContinueWith(r =>
+                        {
+                            if (r.IsFaulted)
+                            {
+                                AddLog($"Error triggering OpenShock: {r.Exception?.Message}", Colors.Red);
+                            }
+                        });
+                }
+                else
+                {
+                    AddLog($"Unknown shocker type: {selectedShocker.Type}", Colors.Red);
+                }
+            }
+            catch (Exception ex)
+            {
+                AddLog($"Error testing shocker: {ex.Message}", Colors.Red);
+            }
+        }
+
+
+        private void OnUpdateClickBtn(object? sender, RoutedEventArgs e)
         {
             if ((DataContext as MainWindowViewModel)!.HasUpdateAvailable)
             {
-                string updateToDownload = (DataContext as MainWindowViewModel)!.UpdateVersion ?? "latest";
+                // Open the update changelog window
+                UpdateChangelogWindow updateChangelogWindow = new(updateService);
+                updateChangelogWindow.ShowDialog<UpdateChangelogWindowResult>(this)
+                    .ContinueWith(t =>
+                    {
+                        if (t.Result != null && t.Result.ShouldUpdate)
+                        {
+                            InitiateUpdateClickBtn();
+                        }
+                        else
+                        {
+                            AddLog("Update cancelled", Colors.LightGray);
+                        }
+                    });
+            }
+        }
+
+        private void InitiateUpdateClickBtn()
+        {
+            bool hasUpdate = false;
+            string updateToDownload = string.Empty;
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                hasUpdate = (DataContext as MainWindowViewModel)!.HasUpdateAvailable;
+                updateToDownload = (DataContext as MainWindowViewModel)!.UpdateVersion ?? "latest";
+            }, DispatcherPriority.MaxValue);
+
+            if (hasUpdate)
+            {
                 Task.Run(async () =>
                 {
                     try
@@ -568,27 +682,45 @@ namespace TurretShocky.Views
                         // Extract the updater
                         using ZipArchive zip = ZipFile.OpenRead("TurretShocky_update.zip");
                         bool foundUpdater = false;
+                        bool hasUpdaterFolder = System.IO.Directory.Exists(System.IO.Path.Combine(AppContext.BaseDirectory, "Updater"));
+                        string updaterPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Updater.exe");
                         foreach (ZipArchiveEntry entry in zip.Entries)
                         {
-                            if (entry.Name == "Updater.exe")
+                            if(hasUpdaterFolder && entry.Name.EndsWith(".dll"))
+                            {
+                                // The updater needs the .dll files that could not be in the Updater folder for some reason
+                                entry.ExtractToFile(System.IO.Path.Combine(AppContext.BaseDirectory, "Updater", entry.Name), true);
+                            }
+                            else if (entry.Name == "Updater.exe")
                             {
                                 foundUpdater = true;
-                                string targetPath = System.IO.Path.Combine(AppContext.BaseDirectory, entry.Name);
-                                entry.ExtractToFile(targetPath, true);
+
+                                // If the Updater folder exists, extract to it, otherwise extract to the current directory
+                                // (The updater will create the folder if it doesn't exist)
+                                if (hasUpdaterFolder)
+                                {
+                                    updaterPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Updater", entry.Name);
+                                }
+
+                                entry.ExtractToFile(updaterPath, true);
+                            }
+                        }
+                        if (foundUpdater)
+                        {
                                 AddLog($"Extracted updater! The application will update in a few seconds.", Colors.Green);
                                 await Task.Delay(3000); // Wait 3 seconds before applying the update
+
                                 // Start the updater
                                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                                 {
-                                    FileName = "Updater.exe",
+                                    FileName = updaterPath,
                                     UseShellExecute = true
                                 });
 
                                 // Close the main application
                                 Environment.Exit(0);
-                            }
                         }
-                        if (!foundUpdater)
+                        else
                         {
                             AddLog("Updater not found in the downloaded archive. Please install it manually or check the Github for more information.", Colors.Yellow);
                             return;

@@ -17,7 +17,7 @@ namespace TurretShocky.ViewModels
         private uint _maxIntensity = 0;
         private bool _hasUpdateAvailable = false;
         private string _updateVersion = "0.0.0";
-        private string? _currentVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
+        private string? _currentVersion = Utils.GetCurrentVersion();
 
         public ObservableCollection<LogEntry> LogEntries
         {
@@ -90,7 +90,7 @@ namespace TurretShocky.ViewModels
             MaxIntensity = 0;
             HasUpdateAvailable = false;
             UpdateVersion = "0.0.0";
-            CurrentVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
+            CurrentVersion = Utils.GetCurrentVersion();
         }
 
         public void AddLog(string message, Color color)
