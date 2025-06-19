@@ -37,14 +37,97 @@ public partial class MainView : UserControl
                     await Task.Delay(1000);
                 }
 
+                // Wait for an eventual other updater to close
+                // But we only wait for a maximum of 4 seconds in case there's another program running with the same name
+                Process[] updaterProcesses = Process.GetProcessesByName("Updater");
+                Process currentProcess = Process.GetCurrentProcess();
+                int nbAttempts = 0;
+                while (updaterProcesses.Length > 0 && nbAttempts < 4)
+                {
+                    if (updaterProcesses.Length == 1 && updaterProcesses[0].Id == currentProcess.Id)
+                    {
+                        // If the only updater process is this one, we can break
+                        break;
+                    }
+                    updaterProcesses = Process.GetProcessesByName("Updater");
+                    await Task.Delay(1000);
+                    nbAttempts++;
+                }
+
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     (DataContext as MainViewModel)!.UpdateStatusMessage = "Copying files";
                 }, DispatcherPriority.MaxValue);
 
+                // Version check + Version specific actions
+                _currentStep = "Version check";
+                string? version = null;
+                string zipPath = Path.Combine(AppContext.BaseDirectory, "..", "TurretShocky_update.zip");
+                if (File.Exists("..\\TurretShocky.exe"))
+                {
+                    version = FileVersionInfo.GetVersionInfo("..\\TurretShocky.exe").FileVersion ?? throw new InvalidOperationException("Could not retrieve the version of TurretShocky.exe");
+                }
+                else if (File.Exists("TurretShocky.exe"))
+                {
+                    version = FileVersionInfo.GetVersionInfo("TurretShocky.exe").FileVersion ?? throw new InvalidOperationException("Could not retrieve the version of TurretShocky.exe");
+                }
+                else
+                {
+                    throw new FileNotFoundException("TurretShocky.exe not found. Please ensure the updater is run in the correct directory.");
+                }
+
+                // Will be used later for update specific steps
+                //Version currentVersion = new(version);
+                if (File.Exists(Path.Combine(AppContext.BaseDirectory, "TurretShocky.exe"))) // The Updater is in the same directory as TurretShocky.exe, that means we have to move the updater
+                {
+                    // Copy the updater to an Updater folder
+                    _currentStep = "Copy updater";
+                    string updaterPath = Path.Combine(AppContext.BaseDirectory, "Updater");
+                    if (!Directory.Exists(updaterPath))
+                    {
+                        Directory.CreateDirectory(updaterPath);
+                    }
+                    // Extract the updater and all .dll files from the TurretShocky_update.zip to the Updater folder
+                    zipPath = Path.Combine(AppContext.BaseDirectory, "TurretShocky_update.zip");
+                    if (!File.Exists(zipPath))
+                    {
+                        throw new FileNotFoundException("TurretShocky_update.zip not found. Please ensure the updater is run in the correct directory.");
+                    }
+
+                    ZipArchive updaterZip = ZipFile.OpenRead("TurretShocky_update.zip");
+                    foreach (ZipArchiveEntry entry in updaterZip.Entries)
+                    {
+                        // Skip directories
+                        if (entry.FullName.EndsWith('/'))
+                        {
+                            continue;
+                        }
+                        // Only copy the updater and .dll files
+                        if (entry.Name == "Updater.exe" || entry.Name.EndsWith(".dll"))
+                        {
+                            string destinationPath = Path.Combine(updaterPath, entry.Name);
+                            entry.ExtractToFile(destinationPath, true);
+                        }
+                    }
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        (DataContext as MainViewModel)!.UpdateStatusMessage = "The updater will restart";
+                    }, DispatcherPriority.MaxValue);
+                    // Launch the updater from the Updater folder
+                    ProcessStartInfo updaterStartInfo = new()
+                    {
+                        FileName = Path.Combine(updaterPath, "Updater.exe"),
+                        UseShellExecute = true
+                    };
+                    Process.Start(updaterStartInfo);
+                    // Close the current updater
+                    Environment.Exit(0);
+                }
+
+
                 // Copy the files from the TurretShocky_update.zip
                 _currentStep = "Copy";
-                ZipArchive zip = ZipFile.OpenRead("TurretShocky_update.zip");
+                ZipArchive zip = ZipFile.OpenRead(zipPath);
                 foreach (ZipArchiveEntry entry in zip.Entries)
                 {
                     // Don't overwrite the user config file if it happens to be in the zip
@@ -61,8 +144,16 @@ public partial class MainView : UserControl
                     }
 
                     // Gets the full path to ensure that relative segments are removed.
-                    string destinationPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, entry.FullName));
+                    string destinationPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", entry.FullName));
                     entry.ExtractToFile(destinationPath, true);
+                }
+
+                // Remove the old updater if it exists
+                string oldUpdaterPath = Path.Combine(AppContext.BaseDirectory, "..", "Updater.exe");
+                if (File.Exists(oldUpdaterPath))
+                {
+                    _currentStep = "Remove old updater";
+                    File.Delete(oldUpdaterPath);
                 }
 
                 // Cleanup
@@ -72,7 +163,7 @@ public partial class MainView : UserControl
                 }, DispatcherPriority.MaxValue);
                 _currentStep = "Cleanup";
                 zip.Dispose();
-                File.Delete("TurretShocky_update.zip");
+                File.Delete(Path.Combine(AppContext.BaseDirectory, "..", "TurretShocky_update.zip"));
 
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
@@ -83,7 +174,7 @@ public partial class MainView : UserControl
 
                 ProcessStartInfo startInfo = new()
                 {
-                    FileName = "TurretShocky.exe",
+                    FileName = Path.Combine(AppContext.BaseDirectory, "..", "TurretShocky.exe"),
                     UseShellExecute = true
                 };
                 Process.Start(startInfo);
