@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Markdig;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
@@ -11,15 +11,7 @@ using System.Threading.Tasks;
 
 namespace TurretShocky.Services
 {
-    public interface IUpdateService
-    {
-        string LatestStableVersion { get; }
-        string LatestStableVersionUrl { get; }
-        Task<bool> CheckForUpdates();
-        Task DownloadUpdateToCurrentFolder(string targetFileName);
-    }
-
-    public class UpdateService : IUpdateService
+    public class UpdateService
     {
         private readonly HttpClient httpClient = new();
         private readonly string owner;
@@ -30,6 +22,8 @@ namespace TurretShocky.Services
 
         public string LatestStableVersion { get; private set; } = string.Empty;
         public string LatestStableVersionUrl { get; private set; } = string.Empty;
+        public string UpdateHTMLChangelog { get; private set; } = string.Empty;
+        public string UpdateTitle { get; private set; } = string.Empty;
 
         public UpdateService(string owner, string repo, string expectedZipName)
         {
@@ -70,6 +64,10 @@ namespace TurretShocky.Services
             // Update latest version information
             LatestStableVersionUrl = githubAsset.Browser_Download_Url;
             LatestStableVersion = latestVersion;
+
+            // Update changelog
+            UpdateTitle = latestRelease.Name;
+            UpdateHTMLChangelog = Markdown.ToHtml(latestRelease.Body);
 
             // Compare with the current version
             Version latest;

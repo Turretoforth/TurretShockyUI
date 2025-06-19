@@ -23,10 +23,10 @@
       <StackPanel Spacing="5" Orientation="Horizontal" HorizontalAlignment="Center">
         <TextBlock HorizontalAlignment="Center" FontSize="18" FontWeight="Bold">TurretShocky</TextBlock>
         <TextBlock Text="{Binding CurrentVersion}" VerticalAlignment="Center" FontSize="12"></TextBlock>
-        <Button IsVisible="{Binding HasUpdateAvailable}" Click="InitiateUpdateClickBtn">
+        <Button IsVisible="{Binding HasUpdateAvailable}" Click="OnUpdateClickBtn">
           <Button.Content>
             <StackPanel Orientation="Horizontal" Spacing="4">
-              <TextBlock FontSize="12" VerticalAlignment="Center">Update to</TextBlock>
+              <TextBlock FontSize="12" VerticalAlignment="Center">Update available -> </TextBlock>
               <TextBlock FontSize="12" FontWeight="Bold" VerticalAlignment="Center" Text="{Binding UpdateVersion}"></TextBlock>
             </StackPanel>
           </Button.Content>

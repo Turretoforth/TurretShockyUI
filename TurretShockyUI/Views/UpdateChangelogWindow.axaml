@@ -1,0 +1,24 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="600"
+        x:Class="TurretShocky.UpdateChangelogWindow"
+        Icon="/Assets/Shocky.ico"
+        Title="TurretShocky - Update"
+        Width="500" Height="600">
+  <StackPanel HorizontalAlignment="Center">
+    <TextBlock HorizontalAlignment="Center" Text="Changelog" FontSize="24" FontWeight="Bold" Margin="0,5,0,10"/>
+    <TextBlock Name="ChangelogTitle" HorizontalAlignment="Center" FontSize="14" Margin="0,0,0,10"/>
+    <HtmlPanel Name="ChangelogHtmlPanel"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               Margin="5,0,5,10"
+               Background="WhiteSmoke"
+               Height="470">
+    </HtmlPanel>
+    <Button HorizontalAlignment="Center" Click="UpdateBtn">
+      <TextBlock FontSize="12" FontWeight="Bold">Download and Install</TextBlock>
+    </Button>
+  </StackPanel>
+</Window>
