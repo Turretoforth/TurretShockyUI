@@ -282,6 +282,7 @@ namespace TurretShocky.Views
                 int maxIntensity = 100;
                 int duration = 1;
                 List<Shocker> activatedDevices = [];
+                int delayTrigger = 0;
                 Dispatcher.UIThread.Invoke(() =>
                 {
                     funType = Prefs.FunType;
@@ -290,6 +291,7 @@ namespace TurretShocky.Views
                     duration = Prefs.Duration;
                     activatedDevices = [.. Prefs.Shockers.Where(s => s.IsEnabled)];
                     hasExtraOscMessages = Prefs.App.ShowExtraOscMessages;
+                    delayTrigger = Prefs.App.DelayTrigger;
                 }, DispatcherPriority.MaxValue);
                 if (inCooldown && funType != FunType.Idle)
                 {
@@ -331,6 +333,13 @@ namespace TurretShocky.Views
                     int randomIntensity = rand.Next(minIntensity, maxIntensity);
                     osc.SendParameter("pishock/randomnum", randomIntensity / 100f);
                     AddLog($"{funType} Time! Intensity: {randomIntensity}% for {duration:0.00}s", Colors.Yellow);
+
+                    if (delayTrigger > 0)
+                    {
+                        // If delayTrigger is set, we wait before sending the shock
+                        AddLog($"Delaying trigger by {delayTrigger} second(s)", Colors.LightGray);
+                        Thread.Sleep(delayTrigger * 1000);
+                    }
 
                     // Send the shock or vibration
                     Dispatcher.UIThread.Invoke(() =>
@@ -470,24 +479,15 @@ namespace TurretShocky.Views
             {
                 DataContext = (DataContext as MainWindowViewModel)!.Prefs.App
             };
-            appSettingsWindow.ShowDialog<AppSettingsWindowResult>(this)
+            appSettingsWindow.ShowDialog(this)
                 .ContinueWith(t =>
                 {
-                    // We should always have a result, but just in case
-                    if (t.Result != null)
+                    Dispatcher.UIThread.Invoke(() =>
                     {
-                        // Save the preferences
-                        Dispatcher.UIThread.Invoke(() =>
-                        {
-                            AppSettings appSettings = (DataContext as MainWindowViewModel)!.Prefs.App;
-
-                            appSettings.WatchFiles = t.Result.WatchFiles;
-                            appSettings.CooldownBehaviour = t.Result.CooldownBehaviour;
-                            appSettings.FilesSettings = [.. t.Result.FilesSettings];
-
-                            (DataContext as MainWindowViewModel)!.Prefs.App = appSettings;
-                        });
-                    }
+                        // Save the preferences (This is needed to ensure the changes are applied, else it's a coin toss if it's made in time)
+                        AppSettings appSettings = (DataContext as MainWindowViewModel)!.Prefs.App;
+                        (DataContext as MainWindowViewModel)!.Prefs.App = appSettings;
+                    });
                 }
             );
         }
@@ -686,7 +686,7 @@ namespace TurretShocky.Views
                         string updaterPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Updater.exe");
                         foreach (ZipArchiveEntry entry in zip.Entries)
                         {
-                            if(hasUpdaterFolder && entry.Name.EndsWith(".dll"))
+                            if (hasUpdaterFolder && entry.Name.EndsWith(".dll"))
                             {
                                 // The updater needs the .dll files that could not be in the Updater folder for some reason
                                 entry.ExtractToFile(System.IO.Path.Combine(AppContext.BaseDirectory, "Updater", entry.Name), true);
@@ -707,18 +707,18 @@ namespace TurretShocky.Views
                         }
                         if (foundUpdater)
                         {
-                                AddLog($"Extracted updater! The application will update in a few seconds.", Colors.Green);
-                                await Task.Delay(3000); // Wait 3 seconds before applying the update
+                            AddLog($"Extracted updater! The application will update in a few seconds.", Colors.Green);
+                            await Task.Delay(3000); // Wait 3 seconds before applying the update
 
-                                // Start the updater
-                                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                                {
-                                    FileName = updaterPath,
-                                    UseShellExecute = true
-                                });
+                            // Start the updater
+                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = updaterPath,
+                                UseShellExecute = true
+                            });
 
-                                // Close the main application
-                                Environment.Exit(0);
+                            // Close the main application
+                            Environment.Exit(0);
                         }
                         else
                         {

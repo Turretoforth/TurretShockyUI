@@ -20,22 +20,6 @@ public partial class AppSettingsWindow : Window
         base.OnDataContextEndUpdate();
     }
 
-    protected override void OnClosing(WindowClosingEventArgs e)
-    {
-        if (!e.IsProgrammatic)
-        {
-            Close(new AppSettingsWindowResult
-            {
-                WatchFiles = WatchFiles.IsChecked ?? false,
-                CooldownBehaviour = (DataContext as AppSettings)?.CooldownBehaviour ?? CooldownBehaviour.Ignore,
-                FilesSettings = (DataContext as AppSettings)?.FilesSettings.ToList() ?? []
-            });
-            e.Cancel = true; // Prevents default closing behavior
-        }
-
-        base.OnClosing(e);
-    }
-
     private void FillInitialValues()
     {
         AppSettings? settings = (DataContext as AppSettings);

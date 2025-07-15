@@ -46,6 +46,16 @@ namespace TurretShocky.Models
                 SetProperty(ref _showExtraOscMessages, value);
             }
         }
+
+        private int _delayTrigger = 0;
+        public int DelayTrigger
+        {
+            get => _delayTrigger;
+            set
+            {
+                SetProperty(ref _delayTrigger, value);
+            }
+        }
     }
 
     public enum CooldownBehaviour
