@@ -277,124 +277,7 @@ namespace TurretShocky.Views
                 {
                     inCooldown = m.GetValue<bool>();
                 }
-                FunType funType = FunType.Idle;
-                int minIntensity = 0;
-                int maxIntensity = 100;
-                int duration = 1;
-                List<Shocker> activatedDevices = [];
-                Dispatcher.UIThread.Invoke(() =>
-                {
-                    funType = Prefs.FunType;
-                    minIntensity = Prefs.MinIntensity;
-                    maxIntensity = Prefs.MaxIntensity;
-                    duration = Prefs.Duration;
-                    activatedDevices = [.. Prefs.Shockers.Where(s => s.IsEnabled)];
-                    hasExtraOscMessages = Prefs.App.ShowExtraOscMessages;
-                }, DispatcherPriority.MaxValue);
-                if (inCooldown && funType != FunType.Idle)
-                {
-                    AddLog($"Detected trigger!", Colors.Firebrick);
-                    if (activatedDevices.Count == 0)
-                    {
-                        AddLog($"No shockers enabled, ignoring trigger and resetting cooldown", Colors.Orange);
-                        osc.SendParameter("pishock/cooldownbool", false);
-                        return;
-                    }
-
-                    float cooldownTime = 0f;
-                    Dispatcher.UIThread.Invoke(() =>
-                    {
-                        cooldownTime = Prefs.CooldownTime;
-                        (DataContext as MainWindowViewModel)!.TimesTriggered++;
-                    }, DispatcherPriority.MaxValue);
-
-                    // Start the cooldown timer first
-                    AddLog($"Cooldown started for {cooldownTime:0.00}s", Colors.LightGreen);
-                    Task.Run(() =>
-                    {
-                        lock (lockCooldown)
-                        {
-                            inCooldown = true;
-                        }
-                        Task.Delay((int)Math.Round(cooldownTime * 1000)).Wait();
-                        lock (lockCooldown)
-                        {
-                            inCooldown = false;
-                        }
-                        osc.SendParameter("pishock/cooldownbool", false);
-                        AddLog("Cooldown finished", Colors.LightBlue);
-                    });
-
-                    // Then send the message to the PiShock
-                    // Generate a random intensity value between min and max
-                    Random rand = new();
-                    int randomIntensity = rand.Next(minIntensity, maxIntensity);
-                    osc.SendParameter("pishock/randomnum", randomIntensity / 100f);
-                    AddLog($"{funType} Time! Intensity: {randomIntensity}% for {duration:0.00}s", Colors.Yellow);
-
-                    // Send the shock or vibration
-                    Dispatcher.UIThread.Invoke(() =>
-                    {
-                        piShockService ??= new PiShockService(Prefs.Api.ApiKey, Prefs.Api.Username);
-                    });
-                    if (activatedDevices.Any(s => s.Type == ShockerType.PiShock))
-                    {
-                        AddLog($"Triggering {activatedDevices.Count(s => s.Type == ShockerType.PiShock)} PiShock device(s)", Colors.Yellow);
-                        piShockService!.DoPiShockOperations(funType, duration, randomIntensity, [.. activatedDevices.Where(s => s.Type == ShockerType.PiShock).Select(s => s.Code)])
-                            .ContinueWith(r =>
-                        {
-                            foreach (var shocker in r.Result)
-                            {
-                                if (!shocker.Value.Success)
-                                {
-                                    AddLog($"Error triggering PiShock {shocker.Key}: {shocker.Value.Message}", Colors.Red);
-                                }
-                            }
-                        });
-                    }
-                    if (activatedDevices.Any(s => s.Type == ShockerType.OpenShock))
-                    {
-                        AddLog($"Triggering {activatedDevices.Count(s => s.Type == ShockerType.OpenShock)} OpenShock device(s)", Colors.Yellow);
-                        OpenShockService.SendShockerCommand([.. activatedDevices.Where(s => s.Type == ShockerType.OpenShock).Select(s => s.Code)],
-                            funType, randomIntensity, duration * 1000) // For OpenShock, duration is in milliseconds
-                        .ContinueWith(r =>
-                        {
-                            if (r.IsFaulted)
-                            {
-                                AddLog($"Error triggering OpenShock: {r.Exception?.Message}", Colors.Red);
-                            }
-                        });
-                    }
-
-                    Dispatcher.UIThread.Invoke(() =>
-                    {
-                        if (funType == FunType.Shock)
-                        {
-                            (DataContext as MainWindowViewModel)!.NbShocks += (uint)activatedDevices.Count;
-                        }
-                        if ((DataContext as MainWindowViewModel)!.MaxIntensity < randomIntensity)
-                        {
-                            (DataContext as MainWindowViewModel)!.MaxIntensity = (uint)randomIntensity;
-                        }
-                    }, DispatcherPriority.Render);
-                }
-                else if (inCooldown && funType == FunType.Idle)
-                {
-                    // Should not happen, but just in case, we reset the cooldown
-                    AddLog($"Trigger ignored, currently in Idle mode. Resetting cooldown.", Colors.Yellow);
-                    lock (lockCooldown)
-                    {
-                        inCooldown = false;
-                    }
-                    osc.SendParameter("pishock/cooldownbool", false);
-                }
-                else if (!inCooldown && funType != FunType.Idle && shockQueue.TryDequeue(out ShockTrigger trigger))
-                {
-                    // React to any queued triggers
-                    AddLog($"Processing queued trigger: '{trigger.TriggerText}'. Simulating touch!", Colors.Firebrick);
-                    Thread.Sleep(1000); // Wait a bit before simulating the touch to be sure to trigger it
-                    SimulateTouch();
-                }
+                ActionOnTrigger();
                 // We ignore the false value from OSC, because it is sent back sometimes when we change the value
             }
             else if (m.Path.Equals("/TouchPoint_0"))
@@ -439,6 +322,136 @@ namespace TurretShocky.Views
             }
         }
 
+        private void ActionOnTrigger()
+        {
+            FunType funType = FunType.Idle;
+            int minIntensity = 0;
+            int maxIntensity = 100;
+            int duration = 1;
+            List<Shocker> activatedDevices = [];
+            int delayTrigger = 0;
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                funType = Prefs.FunType;
+                minIntensity = Prefs.MinIntensity;
+                maxIntensity = Prefs.MaxIntensity;
+                duration = Prefs.Duration;
+                activatedDevices = [.. Prefs.Shockers.Where(s => s.IsEnabled)];
+                delayTrigger = Prefs.App.DelayTrigger;
+            }, DispatcherPriority.MaxValue);
+            if (inCooldown && funType != FunType.Idle)
+            {
+                AddLog($"Detected trigger!", Colors.Firebrick);
+                if (activatedDevices.Count == 0)
+                {
+                    AddLog($"No shockers enabled, ignoring trigger and resetting cooldown", Colors.Orange);
+                    osc.SendParameter("pishock/cooldownbool", false);
+                    return;
+                }
+
+                float cooldownTime = 0f;
+                Dispatcher.UIThread.Invoke(() =>
+                {
+                    cooldownTime = Prefs.CooldownTime;
+                    (DataContext as MainWindowViewModel)!.TimesTriggered++;
+                }, DispatcherPriority.MaxValue);
+
+                // Start the cooldown timer first
+                AddLog($"Cooldown started for {cooldownTime:0.00}s", Colors.LightGreen);
+                Task.Run(() =>
+                {
+                    lock (lockCooldown)
+                    {
+                        inCooldown = true;
+                    }
+                    Task.Delay((int)Math.Round(cooldownTime * 1000)).Wait();
+                    lock (lockCooldown)
+                    {
+                        inCooldown = false;
+                    }
+                    osc.SendParameter("pishock/cooldownbool", false);
+                    AddLog("Cooldown finished", Colors.LightBlue);
+                });
+
+                // Then send the message to the PiShock
+                // Generate a random intensity value between min and max
+                Random rand = new();
+                int randomIntensity = rand.Next(minIntensity, maxIntensity);
+                osc.SendParameter("pishock/randomnum", randomIntensity / 100f);
+                AddLog($"{funType} Time! Intensity: {randomIntensity}% for {duration:0.00}s", Colors.Yellow);
+
+                if (delayTrigger > 0)
+                {
+                    // If delayTrigger is set, we wait before sending the shock
+                    AddLog($"Delaying trigger by {delayTrigger} second(s)", Colors.LightGray);
+                    Thread.Sleep(delayTrigger * 1000);
+                }
+
+                // Send the shock or vibration
+                Dispatcher.UIThread.Invoke(() =>
+                {
+                    piShockService ??= new PiShockService(Prefs.Api.ApiKey, Prefs.Api.Username);
+                });
+                if (activatedDevices.Any(s => s.Type == ShockerType.PiShock))
+                {
+                    AddLog($"Triggering {activatedDevices.Count(s => s.Type == ShockerType.PiShock)} PiShock device(s)", Colors.Yellow);
+                    piShockService!.DoPiShockOperations(funType, duration, randomIntensity, [.. activatedDevices.Where(s => s.Type == ShockerType.PiShock).Select(s => s.Code)])
+                        .ContinueWith(r =>
+                        {
+                            foreach (var shocker in r.Result)
+                            {
+                                if (!shocker.Value.Success)
+                                {
+                                    AddLog($"Error triggering PiShock {shocker.Key}: {shocker.Value.Message}", Colors.Red);
+                                }
+                            }
+                        });
+                }
+                if (activatedDevices.Any(s => s.Type == ShockerType.OpenShock))
+                {
+                    AddLog($"Triggering {activatedDevices.Count(s => s.Type == ShockerType.OpenShock)} OpenShock device(s)", Colors.Yellow);
+                    OpenShockService.SendShockerCommand([.. activatedDevices.Where(s => s.Type == ShockerType.OpenShock).Select(s => s.Code)],
+                        funType, randomIntensity, duration * 1000) // For OpenShock, duration is in milliseconds
+                    .ContinueWith(r =>
+                    {
+                        if (r.IsFaulted)
+                        {
+                            AddLog($"Error triggering OpenShock: {r.Exception?.Message}", Colors.Red);
+                        }
+                    });
+                }
+
+                Dispatcher.UIThread.Invoke(() =>
+                {
+                    if (funType == FunType.Shock)
+                    {
+                        (DataContext as MainWindowViewModel)!.NbShocks += (uint)activatedDevices.Count;
+                    }
+                    if ((DataContext as MainWindowViewModel)!.MaxIntensity < randomIntensity)
+                    {
+                        (DataContext as MainWindowViewModel)!.MaxIntensity = (uint)randomIntensity;
+                    }
+                }, DispatcherPriority.Render);
+            }
+            else if (inCooldown && funType == FunType.Idle)
+            {
+                // Should not happen, but just in case, we reset the cooldown
+                AddLog($"Trigger ignored, currently in Idle mode. Resetting cooldown.", Colors.Yellow);
+                lock (lockCooldown)
+                {
+                    inCooldown = false;
+                }
+                osc.SendParameter("pishock/cooldownbool", false);
+            }
+            else if (!inCooldown && funType != FunType.Idle && shockQueue.TryDequeue(out ShockTrigger trigger))
+            {
+                // React to any queued triggers
+                AddLog($"Processing queued trigger: '{trigger.TriggerText}'. Simulating touch!", Colors.Firebrick);
+                Thread.Sleep(1000); // Wait a bit before simulating the touch to be sure to trigger it
+                SimulateTouch();
+            }
+        }
+
         private void SimulateTouch()
         {
             osc.SendParameter("pishock/TouchPoint_0", true);
@@ -470,24 +483,15 @@ namespace TurretShocky.Views
             {
                 DataContext = (DataContext as MainWindowViewModel)!.Prefs.App
             };
-            appSettingsWindow.ShowDialog<AppSettingsWindowResult>(this)
+            appSettingsWindow.ShowDialog(this)
                 .ContinueWith(t =>
                 {
-                    // We should always have a result, but just in case
-                    if (t.Result != null)
+                    Dispatcher.UIThread.Invoke(() =>
                     {
-                        // Save the preferences
-                        Dispatcher.UIThread.Invoke(() =>
-                        {
-                            AppSettings appSettings = (DataContext as MainWindowViewModel)!.Prefs.App;
-
-                            appSettings.WatchFiles = t.Result.WatchFiles;
-                            appSettings.CooldownBehaviour = t.Result.CooldownBehaviour;
-                            appSettings.FilesSettings = [.. t.Result.FilesSettings];
-
-                            (DataContext as MainWindowViewModel)!.Prefs.App = appSettings;
-                        });
-                    }
+                        // Save the preferences (This is needed to ensure the changes are applied, else it's a coin toss if it's made in time)
+                        AppSettings appSettings = (DataContext as MainWindowViewModel)!.Prefs.App;
+                        (DataContext as MainWindowViewModel)!.Prefs.App = appSettings;
+                    });
                 }
             );
         }
@@ -686,7 +690,7 @@ namespace TurretShocky.Views
                         string updaterPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Updater.exe");
                         foreach (ZipArchiveEntry entry in zip.Entries)
                         {
-                            if(hasUpdaterFolder && entry.Name.EndsWith(".dll"))
+                            if (hasUpdaterFolder && entry.Name.EndsWith(".dll"))
                             {
                                 // The updater needs the .dll files that could not be in the Updater folder for some reason
                                 entry.ExtractToFile(System.IO.Path.Combine(AppContext.BaseDirectory, "Updater", entry.Name), true);
@@ -707,18 +711,18 @@ namespace TurretShocky.Views
                         }
                         if (foundUpdater)
                         {
-                                AddLog($"Extracted updater! The application will update in a few seconds.", Colors.Green);
-                                await Task.Delay(3000); // Wait 3 seconds before applying the update
+                            AddLog($"Extracted updater! The application will update in a few seconds.", Colors.Green);
+                            await Task.Delay(3000); // Wait 3 seconds before applying the update
 
-                                // Start the updater
-                                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                                {
-                                    FileName = updaterPath,
-                                    UseShellExecute = true
-                                });
+                            // Start the updater
+                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = updaterPath,
+                                UseShellExecute = true
+                            });
 
-                                // Close the main application
-                                Environment.Exit(0);
+                            // Close the main application
+                            Environment.Exit(0);
                         }
                         else
                         {
