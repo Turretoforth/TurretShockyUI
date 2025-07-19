@@ -134,6 +134,9 @@
             <TextBlock VerticalAlignment="Center">Configure API</TextBlock>
           </StackPanel>
         </Button>
+      <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0,0,0" Padding="5" IsChecked="{Binding RouletteMode}">
+        <TextBlock FontSize="14">Roulette Mode</TextBlock>
+      </CheckBox>
       </WrapPanel>
       <ItemsControl ItemsSource="{Binding Prefs.Shockers}" Padding="5">
         <ItemsControl.ItemsPanel>

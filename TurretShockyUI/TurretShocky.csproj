@@ -6,8 +6,8 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <AssemblyVersion>1.2.1.7170</AssemblyVersion>
-    <FileVersion>1.2.1.7170</FileVersion>
+    <AssemblyVersion>1.2.1.7190</AssemblyVersion>
+    <FileVersion>1.2.1.7190</FileVersion>
     <ApplicationIcon>Assets\Shocky.ico</ApplicationIcon>
     <AssemblyName>TurretShocky</AssemblyName>
   </PropertyGroup>
