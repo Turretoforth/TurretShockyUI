@@ -330,6 +330,7 @@ namespace TurretShocky.Views
             int duration = 1;
             List<Shocker> activatedDevices = [];
             int delayTrigger = 0;
+            bool isRouletteMode = false;
             Dispatcher.UIThread.Invoke(() =>
             {
                 funType = Prefs.FunType;
@@ -338,6 +339,7 @@ namespace TurretShocky.Views
                 duration = Prefs.Duration;
                 activatedDevices = [.. Prefs.Shockers.Where(s => s.IsEnabled)];
                 delayTrigger = Prefs.App.DelayTrigger;
+                isRouletteMode = Prefs.RouletteMode;
             }, DispatcherPriority.MaxValue);
             if (inCooldown && funType != FunType.Idle)
             {
@@ -388,14 +390,21 @@ namespace TurretShocky.Views
                 }
 
                 // Send the shock or vibration
-                Dispatcher.UIThread.Invoke(() =>
+                List<Shocker> selectedDevices = activatedDevices;
+                if (isRouletteMode) // Roulette mode: select a random device
                 {
-                    piShockService ??= new PiShockService(Prefs.Api.ApiKey, Prefs.Api.Username);
-                });
-                if (activatedDevices.Any(s => s.Type == ShockerType.PiShock))
+                    selectedDevices = [.. selectedDevices.OrderBy(s => rand.Next()).Take(1)];
+                    AddLog($"Roulette mode enabled, selected {selectedDevices[0].Name}", Colors.LightBlue);
+                }
+
+                if (selectedDevices.Any(s => s.Type == ShockerType.PiShock))
                 {
-                    AddLog($"Triggering {activatedDevices.Count(s => s.Type == ShockerType.PiShock)} PiShock device(s)", Colors.Yellow);
-                    piShockService!.DoPiShockOperations(funType, duration, randomIntensity, [.. activatedDevices.Where(s => s.Type == ShockerType.PiShock).Select(s => s.Code)])
+                    Dispatcher.UIThread.Invoke(() =>
+                    {
+                        piShockService ??= new PiShockService(Prefs.Api.ApiKey, Prefs.Api.Username);
+                    });
+                    AddLog($"Triggering {selectedDevices.Count(s => s.Type == ShockerType.PiShock)} PiShock device(s)", Colors.Yellow);
+                    piShockService!.DoPiShockOperations(funType, duration, randomIntensity, [.. selectedDevices.Where(s => s.Type == ShockerType.PiShock).Select(s => s.Code)])
                         .ContinueWith(r =>
                         {
                             foreach (var shocker in r.Result)
@@ -407,10 +416,10 @@ namespace TurretShocky.Views
                             }
                         });
                 }
-                if (activatedDevices.Any(s => s.Type == ShockerType.OpenShock))
+                if (selectedDevices.Any(s => s.Type == ShockerType.OpenShock))
                 {
-                    AddLog($"Triggering {activatedDevices.Count(s => s.Type == ShockerType.OpenShock)} OpenShock device(s)", Colors.Yellow);
-                    OpenShockService.SendShockerCommand([.. activatedDevices.Where(s => s.Type == ShockerType.OpenShock).Select(s => s.Code)],
+                    AddLog($"Triggering {selectedDevices.Count(s => s.Type == ShockerType.OpenShock)} OpenShock device(s)", Colors.Yellow);
+                    OpenShockService.SendShockerCommand([.. selectedDevices.Where(s => s.Type == ShockerType.OpenShock).Select(s => s.Code)],
                         funType, randomIntensity, duration * 1000) // For OpenShock, duration is in milliseconds
                     .ContinueWith(r =>
                     {
@@ -425,7 +434,7 @@ namespace TurretShocky.Views
                 {
                     if (funType == FunType.Shock)
                     {
-                        (DataContext as MainWindowViewModel)!.NbShocks += (uint)activatedDevices.Count;
+                        (DataContext as MainWindowViewModel)!.NbShocks += (uint)selectedDevices.Count;
                     }
                     if ((DataContext as MainWindowViewModel)!.MaxIntensity < randomIntensity)
                     {

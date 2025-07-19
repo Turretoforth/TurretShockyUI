@@ -12,6 +12,7 @@ namespace TurretShocky.Models
             _maxIntensity = Preferences.Get("maxintensity", 100);
             _cooldownTime = Preferences.Get("cooldown", 10f);
             _duration = Preferences.Get("duration", 1);
+            _rouletteMode = Preferences.Get("roulettemode", false);
             _shockers = Preferences.Get("shockers", new ObservableCollection<Shocker>())!;
             _api = Preferences.Get("api", new ApiSettings())!;
             _app = Preferences.Get("app", new AppSettings())!;
@@ -23,6 +24,7 @@ namespace TurretShocky.Models
             _maxIntensity = 45;
             _cooldownTime = 12f;
             _duration = 1;
+            _rouletteMode = false;
             _shockers = [
                 new() { Name = "Test Shocker1", Code = "A2B66ABF", IsEnabled = true, Type = ShockerType.PiShock },
                 new() { Name = "Test Shocker2", Code = "C6B22ABF", IsEnabled = true, Type = ShockerType.PiShock },
@@ -84,6 +86,17 @@ namespace TurretShocky.Models
             {
                 Preferences.Set("duration", value);
                 SetProperty(ref _duration, value);
+            }
+        }
+
+        private bool _rouletteMode;
+        public bool RouletteMode
+        {
+            get => _rouletteMode;
+            set
+            {
+                Preferences.Set("roulettemode", value);
+                SetProperty(ref _rouletteMode, value);
             }
         }
 

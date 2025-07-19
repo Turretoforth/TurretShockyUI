@@ -79,6 +79,18 @@ namespace TurretShocky.ViewModels
             set { SetProperty(ref _currentVersion, value); }
         }
 
+        public bool RouletteMode
+        {
+            get { return Prefs.RouletteMode; }
+            set
+            {
+                if (Prefs.RouletteMode != value)
+                {
+                    Prefs.RouletteMode = value;
+                }
+            }
+        }
+
         public MainWindowViewModel()
         {
             LogEntries = [];
