@@ -37,7 +37,7 @@ namespace TurretShocky.Services
             {
                 string json = $"{{\"Username\":\"{_username}\",\"Name\":\"TurretShocky\",\"Code\":\"{shockerCode}\",\"Intensity\":\"{intensity}\",\"Duration\":\"{nbSeconds}\",\"ApiKey\":\"{_apiKey}\",\"Op\":\"{(int)type}\"}}";
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync($"https://do.pishock.com/api/apioperate", content);
+                var response = await _httpClient.PostAsync($"https://ps.pishock.com/PiShock/Operate", content);
                 if (response.IsSuccessStatusCode)
                 {
                     result.Success = true;
