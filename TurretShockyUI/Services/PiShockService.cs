@@ -7,15 +7,22 @@ using TurretShocky.Models;
 
 namespace TurretShocky.Services
 {
-    public class PiShockService(string apiKey, string username)
+    public class PiShockService
     {
-        private readonly string _apiKey = apiKey;
-        private readonly string _username = username;
+        private readonly string _apiKey;
+        private readonly string _username;
         private readonly HttpClient _httpClient = new()
         {
             // Sometimes the API can be slow, so we give it time (Although, the shock *usually* go through even if the timeout is reached)
             Timeout = TimeSpan.FromSeconds(8)
         };
+
+        public PiShockService(string apiKey, string username)
+        {
+            _apiKey = apiKey;
+            _username = username;
+            _httpClient.DefaultRequestHeaders.Add("X-PiShock-Api-Key", _apiKey);
+        }
 
         public async Task<Dictionary<string, OperationResult>> DoPiShockOperations(FunType type, int nbSeconds, int intensity, List<string> shockerCodes)
         {

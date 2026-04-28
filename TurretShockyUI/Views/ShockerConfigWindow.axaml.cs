@@ -85,88 +85,94 @@ public partial class ShockerConfigWindow : Window
         });
     }
 
-    private void PiShock_Checked(object? sender, RoutedEventArgs e)
+    private void PiShockType_PropertyChanged(object? sender, Avalonia.AvaloniaPropertyChangedEventArgs e)
     {
-        OSSelectStack.IsVisible = false;
-        OSShockerSelect.IsVisible = false;
-        OSShockerSelect.Items.Clear();
+        if (e.Property.Name == nameof(RadioButton.IsChecked) && (bool?)e.NewValue == true)
+        {
+            OSSelectStack.IsVisible = false;
+            OSShockerSelect.IsVisible = false;
+            OSShockerSelect.Items.Clear();
+        }
     }
 
-    private void OpenShock_Checked(object? sender, RoutedEventArgs e)
+    private void OpenShockType_PropertyChanged(object? sender, Avalonia.AvaloniaPropertyChangedEventArgs e)
     {
-        OSSelectStack.IsVisible = true;
-        OSShockerSelect.IsVisible = true;
-        try
+        if (e.Property.Name == nameof(RadioButton.IsChecked) && (bool?)e.NewValue == true)
         {
-            OSShockerSelect.Items.Clear();
-            OSShockerSelect.Items.Add(new ComboBoxItem
+            OSSelectStack.IsVisible = true;
+            OSShockerSelect.IsVisible = true;
+            try
             {
-                Content = "Loading...",
-                Name = "default"
-            });
-            OSShockerSelect.SelectedIndex = 0; // Select the first item by default
-
-            Task.Run(async () =>
-            {
-                try
+                OSShockerSelect.Items.Clear();
+                OSShockerSelect.Items.Add(new ComboBoxItem
                 {
-                    List<OpenShocker> openShockers = [];
-                    List<OpenShocker> ownShockers = await OpenShockService.GetOwnShockers();
-                    openShockers.AddRange(ownShockers);
-                    List<OpenShocker> sharedShockers = await OpenShockService.GetSharedShockers();
-                    openShockers.AddRange(sharedShockers);
+                    Content = "Loading...",
+                    Name = "default"
+                });
+                OSShockerSelect.SelectedIndex = 0; // Select the first item by default
 
-                    _openShockers = openShockers; // Store the fetched shockers
-
-                    await Dispatcher.UIThread.InvokeAsync(() =>
+                Task.Run(async () =>
+                {
+                    try
                     {
-                        OSShockerSelect.Items.Clear(); // Clear the loading item
-                        OSShockerSelect.Items.Add(new ComboBoxItem
-                        {
-                            Content = openShockers.Count > 0 ? "Select a shocker" : "No shockers found",
-                            Name = "default"
-                        });
-                        OSShockerSelect.SelectedIndex = 0; // Refresh the selection
-                    }, DispatcherPriority.MaxValue);
+                        List<OpenShocker> openShockers = [];
+                        List<OpenShocker> ownShockers = await OpenShockService.GetOwnShockers();
+                        openShockers.AddRange(ownShockers);
+                        List<OpenShocker> sharedShockers = await OpenShockService.GetSharedShockers();
+                        openShockers.AddRange(sharedShockers);
 
-                    foreach (OpenShocker shocker in ownShockers)
+                        _openShockers = openShockers; // Store the fetched shockers
+
+                        await Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            OSShockerSelect.Items.Clear(); // Clear the loading item
+                            OSShockerSelect.Items.Add(new ComboBoxItem
+                            {
+                                Content = openShockers.Count > 0 ? "Select a shocker" : "No shockers found",
+                                Name = "default"
+                            });
+                            OSShockerSelect.SelectedIndex = 0; // Refresh the selection
+                        }, DispatcherPriority.MaxValue);
+
+                        foreach (OpenShocker shocker in ownShockers)
+                        {
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                OSShockerSelect.Items.Add(new ComboBoxItem
+                                {
+                                    Content = $"{shocker.Name} ({(shocker.IsPaused ? "Paused" : "Active")})",
+                                    Name = shocker.Id.ToString()
+                                });
+                            }, DispatcherPriority.MaxValue);
+                        }
+
+                        foreach (OpenShocker shocker in sharedShockers)
+                        {
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                OSShockerSelect.Items.Add(new ComboBoxItem
+                                {
+                                    Content = $"{shocker.Name} (Shared - {(shocker.IsPaused ? "Paused" : "Active")})",
+                                    Name = shocker.Id.ToString()
+                                });
+                            }, DispatcherPriority.MaxValue);
+                        }
+                    }
+                    catch (Exception ex)
                     {
                         await Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            OSShockerSelect.Items.Add(new ComboBoxItem
-                            {
-                                Content = $"{shocker.Name} ({(shocker.IsPaused ? "Paused" : "Active")})",
-                                Name = shocker.Id.ToString()
-                            });
+                            ErrorDialog errorDialog = new($"An error occurred: {ex.Message}");
+                            errorDialog.ShowDialog(this);
                         }, DispatcherPriority.MaxValue);
                     }
-
-                    foreach (OpenShocker shocker in sharedShockers)
-                    {
-                        await Dispatcher.UIThread.InvokeAsync(() =>
-                        {
-                            OSShockerSelect.Items.Add(new ComboBoxItem
-                            {
-                                Content = $"{shocker.Name} (Shared - {(shocker.IsPaused ? "Paused" : "Active")})",
-                                Name = shocker.Id.ToString()
-                            });
-                        }, DispatcherPriority.MaxValue);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await Dispatcher.UIThread.InvokeAsync(() =>
-                    {
-                        ErrorDialog errorDialog = new($"An error occurred: {ex.Message}");
-                        errorDialog.ShowDialog(this);
-                    }, DispatcherPriority.MaxValue);
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            ErrorDialog errorDialog = new($"An error occurred: {ex.Message}");
-            errorDialog.ShowDialog(this);
+                });
+            }
+            catch (Exception ex)
+            {
+                ErrorDialog errorDialog = new($"An error occurred: {ex.Message}");
+                errorDialog.ShowDialog(this);
+            }
         }
     }
 
