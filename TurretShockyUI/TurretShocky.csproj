@@ -6,8 +6,8 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <AssemblyVersion>1.3.0.4280</AssemblyVersion>
-    <FileVersion>1.3.0.4280</FileVersion>
+    <AssemblyVersion>1.3.0.5210</AssemblyVersion>
+    <FileVersion>1.3.0.5210</FileVersion>
     <ApplicationIcon>Assets\Shocky.ico</ApplicationIcon>
     <AssemblyName>TurretShocky</AssemblyName>
   </PropertyGroup>
@@ -27,7 +27,7 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.2" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.0.2" />
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.1" >
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.1">
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>

@@ -12,6 +12,7 @@ namespace TurretShocky.Models
             _code = string.Empty;
             _type = ShockerType.PiShock;
             _isEnabled = false;
+            _isSelected = false;
         }
 
         private Guid _uid;
@@ -61,6 +62,16 @@ namespace TurretShocky.Models
             set
             {
                 SetProperty(ref _isEnabled, value);
+            }
+        }
+
+        private bool _isSelected;
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                SetProperty(ref _isSelected, value);
             }
         }
     }
