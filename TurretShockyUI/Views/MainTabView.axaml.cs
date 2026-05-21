@@ -17,7 +17,6 @@ namespace TurretShocky.Views
 {
     public partial class MainTabView : UserControl
     {
-        readonly VRChatOSC osc = new();
         private FileWatcherService? fileWatcherService;
         private readonly Lock lockCooldown = new();
         private PiShockService? piShockService;
@@ -123,8 +122,7 @@ namespace TurretShocky.Views
                     fileWatcherService.StartWatching();
                 }
 
-                osc.Connect();
-                osc.OnMessage += ((e, m) =>
+                OSCService.StartOSC((e, m) =>
                 {
                     try
                     {
@@ -137,9 +135,8 @@ namespace TurretShocky.Views
                     }
                 });
 
-                osc.Listen();
                 AddLog($"Started listening to OSC", Colors.Green);
-                SendSavedPrefs(osc);
+                SendSavedPrefs();
 
                 Task.Run(async () =>
                 {
@@ -148,9 +145,9 @@ namespace TurretShocky.Views
                     {
                         // Send a random Idle face every 10 minutes
                         await Task.Delay(TimeSpan.FromMinutes(10));
-                        osc.SendParameter("pishock/randomint", random.Next(1, 4));
+                        OSCService.SendParameter("pishock/randomint", random.Next(1, 4));
                         // "Keep alive"
-                        osc.SendParameter("pishock/codeon", true);
+                        OSCService.SendParameter("pishock/codeon", true);
                     }
                 });
             }
@@ -164,24 +161,24 @@ namespace TurretShocky.Views
 
         private void SimulateTouch()
         {
-            osc.SendParameter("pishock/TouchPoint_0", true);
+            OSCService.SendParameter("pishock/TouchPoint_0", true);
             Thread.Sleep(1500); // Simulate a touch for long enough to trigger the shock
-            osc.SendParameter("pishock/TouchPoint_0", false);
+            OSCService.SendParameter("pishock/TouchPoint_0", false);
         }
 
-        private void SendSavedPrefs(VRChatOSC osc)
+        private void SendSavedPrefs()
         {
-            osc.SendParameter("pishock/codeon", true);
-            osc.SendParameter("pishock/onoroff", true);
+            OSCService.SendParameter("pishock/codeon", true);
+            OSCService.SendParameter("pishock/onoroff", true);
             // Send cooldown off just in case it's stuck
-            osc.SendParameter("pishock/cooldownbool", false);
+            OSCService.SendParameter("pishock/cooldownbool", false);
             AddLog("Sent ON signal", Colors.LightYellow);
 
-            osc.SendParameter("pishock/funtype", (int)Prefs.FunType);
-            osc.SendParameter("pishock/minroll", Prefs.MinIntensity / 100f);
-            osc.SendParameter("pishock/maxroll", Prefs.MaxIntensity / 100f);
-            osc.SendParameter("pishock/cooldownset", Prefs.CooldownTime / 100f);
-            osc.SendParameter("pishock/duration", Prefs.Duration / 10f);
+            OSCService.SendParameter("pishock/funtype", (int)Prefs.FunType);
+            OSCService.SendParameter("pishock/minroll", Prefs.MinIntensity / 100f);
+            OSCService.SendParameter("pishock/maxroll", Prefs.MaxIntensity / 100f);
+            OSCService.SendParameter("pishock/cooldownset", Prefs.CooldownTime / 100f);
+            OSCService.SendParameter("pishock/duration", Prefs.Duration / 10f);
 
             AddLog("Sent current preferences", Colors.LightYellow);
         }
@@ -263,17 +260,17 @@ namespace TurretShocky.Views
                 if (!m.GetValue<bool>())
                 {
                     AddLog($"Received code OFF signal, reminding avatar we're alive!", Colors.LightYellow);
-                    osc.SendParameter("pishock/codeon", true);
+                    OSCService.SendParameter("pishock/codeon", true);
                 }
             }
             else if (m.Path.Equals("/change"))
             {
                 // The avatar is reloaded or changed, we need to send the ON signal again
                 AddLog($"Avatar changed or reloaded, sending ON signal", Colors.LightYellow);
-                osc.SendParameter("pishock/codeon", true);
-                osc.SendParameter("pishock/onoroff", true);
+                OSCService.SendParameter("pishock/codeon", true);
+                OSCService.SendParameter("pishock/onoroff", true);
                 // Send cooldown off just in case it's stuck
-                osc.SendParameter("pishock/cooldownbool", false);
+                OSCService.SendParameter("pishock/cooldownbool", false);
             }
             else if (ignoredPaths.Any(p => m.Path.Equals(p)))
             {
@@ -313,7 +310,7 @@ namespace TurretShocky.Views
                 if (activatedDevices.Count == 0)
                 {
                     AddLog($"No shockers enabled, ignoring trigger and resetting cooldown", Colors.Orange);
-                    osc.SendParameter("pishock/cooldownbool", false);
+                    OSCService.SendParameter("pishock/cooldownbool", false);
                     return;
                 }
 
@@ -337,7 +334,7 @@ namespace TurretShocky.Views
                     {
                         inCooldown = false;
                     }
-                    osc.SendParameter("pishock/cooldownbool", false);
+                    OSCService.SendParameter("pishock/cooldownbool", false);
                     AddLog("Cooldown finished", Colors.LightBlue);
                 });
 
@@ -345,7 +342,7 @@ namespace TurretShocky.Views
                 // Generate a random intensity value between min and max
                 Random rand = new();
                 int randomIntensity = rand.Next(minIntensity, maxIntensity);
-                osc.SendParameter("pishock/randomnum", randomIntensity / 100f);
+                OSCService.SendParameter("pishock/randomnum", randomIntensity / 100f);
                 AddLog($"{funType} Time! Intensity: {randomIntensity}% for {duration:0.00}s", Colors.Yellow);
 
                 if (delayTrigger > 0)
@@ -416,7 +413,7 @@ namespace TurretShocky.Views
                 {
                     inCooldown = false;
                 }
-                osc.SendParameter("pishock/cooldownbool", false);
+                OSCService.SendParameter("pishock/cooldownbool", false);
             }
             else if (!inCooldown && funType != FunType.Idle && shockQueue.TryDequeue(out ShockTrigger trigger))
             {
