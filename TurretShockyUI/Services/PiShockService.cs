@@ -9,22 +9,33 @@ namespace TurretShocky.Services
 {
     public class PiShockService
     {
-        private readonly string _apiKey;
-        private readonly string _username;
-        private readonly HttpClient _httpClient = new()
+        private static PiShockService? _currentInstance = null;
+        private static HttpClient _httpClient = new()
         {
             // Sometimes the API can be slow, so we give it time (Although, the shock *usually* go through even if the timeout is reached)
             Timeout = TimeSpan.FromSeconds(8)
         };
+        private readonly string _apiKey;
+        private readonly string _username;
 
-        public PiShockService(string apiKey, string username)
+        private PiShockService(string apiKey, string username)
         {
             _apiKey = apiKey;
             _username = username;
             _httpClient.DefaultRequestHeaders.Add("X-PiShock-Api-Key", _apiKey);
         }
 
-        public async Task<Dictionary<string, OperationResult>> DoPiShockOperations(FunType type, int nbSeconds, int intensity, List<string> shockerCodes)
+        public static void Initialize(string apiKey, string username)
+        {
+            if (_httpClient != null)
+            {
+                _httpClient.Dispose(); // Dispose the old instance if it exists
+                _httpClient = new() { Timeout = TimeSpan.FromSeconds(8) };
+            }
+            _currentInstance = new PiShockService(apiKey, username);
+        }
+
+        public static async Task<Dictionary<string, OperationResult>> DoPiShockOperations(FunType type, int nbSeconds, int intensity, List<string> shockerCodes)
         {
             var result = new Dictionary<string, OperationResult>();
             ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5 };
@@ -37,12 +48,16 @@ namespace TurretShocky.Services
             return result;
         }
 
-        private async Task<OperationResult> DoPiShockOperation(FunType type, int nbSeconds, int intensity, string shockerCode)
+        private static async Task<OperationResult> DoPiShockOperation(FunType type, int nbSeconds, int intensity, string shockerCode)
         {
             var result = new OperationResult();
             try
             {
-                string json = $"{{\"Username\":\"{_username}\",\"Name\":\"TurretShocky\",\"Code\":\"{shockerCode}\",\"Intensity\":\"{intensity}\",\"Duration\":\"{nbSeconds}\",\"ApiKey\":\"{_apiKey}\",\"Op\":\"{(int)type}\"}}";
+                if(_currentInstance == null)
+                {
+                    throw new InvalidOperationException("PiShockService is not initialized.");
+                }
+                string json = $"{{\"Username\":\"{_currentInstance._username}\",\"Name\":\"TurretShocky\",\"Code\":\"{shockerCode}\",\"Intensity\":\"{intensity}\",\"Duration\":\"{nbSeconds}\",\"ApiKey\":\"{_currentInstance._apiKey}\",\"Op\":\"{(int)type}\"}}";
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
                 var response = await _httpClient.PostAsync($"https://ps.pishock.com/PiShock/Operate", content);
                 if (response.IsSuccessStatusCode)

@@ -46,7 +46,7 @@ namespace TurretShocky.Views
 
         private void AddLog(string message, Color color)
         {
-            Dispatcher.UIThread.Invoke(() =>
+            Dispatcher.Invoke(() =>
             {
                 (DataContext as MainWindowViewModel)?.AddLog(message, color);
             }, DispatcherPriority.MaxValue);
@@ -82,7 +82,7 @@ namespace TurretShocky.Views
                             (line, trigger) =>
                             {
                                 // Trigger the shock or handle cooldown
-                                Dispatcher.UIThread.Invoke(() =>
+                                Dispatcher.Invoke(() =>
                                 {
                                     bool cooldown = false;
                                     lock (lockCooldown)
@@ -186,7 +186,7 @@ namespace TurretShocky.Views
         private void HandleOSCMessage(VRCMessage m)
         {
             bool hasExtraOscMessages = false;
-            Dispatcher.UIThread.Invoke(() =>
+            Dispatcher.Invoke(() =>
             {
                 hasExtraOscMessages = Prefs.App.ShowExtraOscMessages;
             }, DispatcherPriority.MaxValue);
@@ -194,7 +194,7 @@ namespace TurretShocky.Views
             // Changed mode
             if (m.Path.Equals("/funtype"))
             {
-                Dispatcher.UIThread.Invoke(() =>
+                Dispatcher.Invoke(() =>
                 {
                     // Update the UI with the new fun type
                     Prefs.FunType = (FunType)m.GetValue<int>();
@@ -203,7 +203,7 @@ namespace TurretShocky.Views
             }
             else if (m.Path.Equals("/minroll"))
             {
-                Dispatcher.UIThread.Invoke(() =>
+                Dispatcher.Invoke(() =>
                 {
                     // Update the UI with the new min intensity
                     Prefs.MinIntensity = (int)Math.Ceiling(m.GetValue<float>() * 100);
@@ -211,7 +211,7 @@ namespace TurretShocky.Views
             }
             else if (m.Path.Equals("/maxroll"))
             {
-                Dispatcher.UIThread.Invoke(() =>
+                Dispatcher.Invoke(() =>
                 {
                     // Update the UI with the new max intensity
                     Prefs.MaxIntensity = (int)Math.Ceiling(m.GetValue<float>() * 100);
@@ -219,7 +219,7 @@ namespace TurretShocky.Views
             }
             else if (m.Path.Equals("/cooldownset"))
             {
-                Dispatcher.UIThread.Invoke(() =>
+                Dispatcher.Invoke(() =>
                 {
                     // Update the UI with the new cooldown time
                     Prefs.CooldownTime = (float)Math.Round(m.GetValue<float>() * 100, 1);
@@ -227,7 +227,7 @@ namespace TurretShocky.Views
             }
             else if (m.Path.Equals("/duration"))
             {
-                Dispatcher.UIThread.Invoke(() =>
+                Dispatcher.Invoke(() =>
                 {
                     // Update the UI with the new duration
                     Prefs.Duration = Math.Clamp((int)Math.Round(m.GetValue<float>() * 10), 1, 15);
@@ -249,7 +249,7 @@ namespace TurretShocky.Views
                 // Can be fun for stats though
                 if (m.GetValue<bool>())
                 {
-                    Dispatcher.UIThread.Invoke(() =>
+                    Dispatcher.Invoke(() =>
                     {
                         (DataContext as MainWindowViewModel)!.NbTouches++;
                     }, DispatcherPriority.Render);
@@ -294,7 +294,7 @@ namespace TurretShocky.Views
             List<Shocker> activatedDevices = [];
             int delayTrigger = 0;
             bool isRouletteMode = false;
-            Dispatcher.UIThread.Invoke(() =>
+            Dispatcher.Invoke(() =>
             {
                 funType = Prefs.FunType;
                 minIntensity = Prefs.MinIntensity;
@@ -315,7 +315,7 @@ namespace TurretShocky.Views
                 }
 
                 float cooldownTime = 0f;
-                Dispatcher.UIThread.Invoke(() =>
+                Dispatcher.Invoke(() =>
                 {
                     cooldownTime = Prefs.CooldownTime;
                     (DataContext as MainWindowViewModel)!.TimesTriggered++;
@@ -362,12 +362,8 @@ namespace TurretShocky.Views
 
                 if (selectedDevices.Any(s => s.Type == ShockerType.PiShock))
                 {
-                    Dispatcher.UIThread.Invoke(() =>
-                    {
-                        piShockService ??= new PiShockService(Prefs.Api.ApiKey, Prefs.Api.Username);
-                    });
                     AddLog($"Triggering {selectedDevices.Count(s => s.Type == ShockerType.PiShock)} PiShock device(s)", Colors.Yellow);
-                    piShockService!.DoPiShockOperations(funType, duration, randomIntensity, [.. selectedDevices.Where(s => s.Type == ShockerType.PiShock).Select(s => s.Code)])
+                    PiShockService.DoPiShockOperations(funType, duration, randomIntensity, [.. selectedDevices.Where(s => s.Type == ShockerType.PiShock).Select(s => s.Code)])
                         .ContinueWith(r =>
                         {
                             foreach (var shocker in r.Result)
@@ -393,7 +389,7 @@ namespace TurretShocky.Views
                     });
                 }
 
-                Dispatcher.UIThread.Invoke(() =>
+                Dispatcher.Invoke(() =>
                 {
                     if (funType == FunType.Shock)
                     {
@@ -437,7 +433,7 @@ namespace TurretShocky.Views
             appSettingsWindow.ShowDialog(window!)
                 .ContinueWith(t =>
                 {
-                    Dispatcher.UIThread.Invoke(() =>
+                    Dispatcher.Invoke(() =>
                     {
                         // Save the preferences (This is needed to ensure the changes are applied, else it's a coin toss if it's made in time)
                         AppSettings appSettings = (DataContext as MainWindowViewModel)!.Prefs.App;

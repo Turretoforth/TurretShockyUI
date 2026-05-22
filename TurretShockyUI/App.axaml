@@ -50,7 +50,7 @@
           <SolidColorBrush x:Key='ForegroundBrush'>Black</SolidColorBrush>
         </ResourceDictionary>
         <ResourceDictionary x:Key='Dark'>
-          <SolidColorBrush x:Key='BackgroundBrush'>Black</SolidColorBrush>
+          <SolidColorBrush x:Key='BackgroundBrush'>#222</SolidColorBrush>
           <SolidColorBrush x:Key='ForegroundBrush'>White</SolidColorBrush>
         </ResourceDictionary>
       </ResourceDictionary.ThemeDictionaries>

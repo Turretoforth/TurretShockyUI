@@ -20,6 +20,7 @@
 	</Design.DataContext>
 	<StackPanel Margin="4" Orientation="Vertical" Spacing="2">
 		<StackPanel Spacing="5" Orientation="Horizontal" HorizontalAlignment="Center">
+			<Image	Source="/Assets/Shocky.ico" Height="20" Margin="0,0,6,0"/>
 			<TextBlock HorizontalAlignment="Center" FontSize="18" FontWeight="Bold">TurretShocky</TextBlock>
 			<TextBlock Text="{Binding CurrentVersion}" VerticalAlignment="Center" FontSize="12"></TextBlock>
 			<Button IsVisible="{Binding HasUpdateAvailable}" Click="OnUpdateClickBtn">
@@ -32,74 +33,14 @@
 			</Button>
 		</StackPanel>
 		<TextBlock HorizontalAlignment="Center" FontSize="12">A better app for the Smart Shock Collar asset</TextBlock>
-		<TabbedPage>
-			<ContentPage Header="Main">
+		<TabbedPage Background="{DynamicResource BackgroundBrush}">
+			<ContentPage Header="Main" Background="{DynamicResource BackgroundBrush}">
 				<views:MainTabView DataContext="{Binding}" />
 			</ContentPage>
-			<ContentPage Header="Shockers">
-				<ScrollViewer>
-					<StackPanel Margin="8" Orientation="Vertical" Spacing="5">
-						<TextBlock HorizontalAlignment="Center" FontSize="15" FontWeight="Bold">Shockers</TextBlock>
-						<WrapPanel HorizontalAlignment="Center">
-							<Button Name="NewShockerBtn" Margin="2" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" Click="OnEditOrCreateShockerBtnClick">
-								<TextBlock>Add a shocker</TextBlock>
-							</Button>
-							<Button Margin="2" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" Click="OnConfigureApiBtnClick" IsEnabled="{Binding IsOscButtonEnabled}">
-								<StackPanel Orientation="Horizontal">
-									<PathIcon Data="{StaticResource options_regular}" Margin="0,0,6,0"></PathIcon>
-									<TextBlock VerticalAlignment="Center">Configure API</TextBlock>
-								</StackPanel>
-							</Button>
-							<CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0,0,0" Padding="5" IsChecked="{Binding RouletteMode}">
-								<TextBlock FontSize="14">Roulette Mode</TextBlock>
-							</CheckBox>
-						</WrapPanel>
-						<ItemsControl ItemsSource="{Binding Prefs.Shockers}" Padding="5">
-							<ItemsControl.ItemsPanel>
-								<ItemsPanelTemplate>
-									<WrapPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
-								</ItemsPanelTemplate>
-							</ItemsControl.ItemsPanel>
-							<ItemsControl.ItemTemplate>
-								<DataTemplate>
-									<Border Margin="5" BorderBrush="{DynamicResource TurretBlue}" BorderThickness="2" CornerRadius="3" Padding="8">
-										<StackPanel Orientation="Vertical" VerticalAlignment="Center" Spacing="2">
-											<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
-												<TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontWeight="Bold"/>
-												<Button Name="{Binding Uid}" HorizontalAlignment="Center" Background="Red" Click="DeleteShockerBtn">
-													<StackPanel Orientation="Horizontal">
-														<PathIcon Data="{StaticResource delete_regular}" Height="11"/>
-													</StackPanel>
-												</Button>
-											</StackPanel>
-											<TextBlock Text="{Binding Type}" HorizontalAlignment="Center" FontSize="11" FontWeight="Bold"></TextBlock>
-											<CheckBox Name="{Binding Uid}" HorizontalAlignment="Center" IsChecked="{Binding IsEnabled}" FontSize="14" Click="ShockerEnableClick">Enabled</CheckBox>
-											<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="2">
-												<Button Name="{Binding Uid}" HorizontalAlignment="Center" Click="OnTestShockerBtnClick">
-													<StackPanel Orientation="Horizontal">
-														<PathIcon Data="{StaticResource phone_vibrate_regular}" Height="11" Margin="0,0,4,0"/>
-														<TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold">Test</TextBlock>
-													</StackPanel>
-												</Button>
-												<Button Name="{Binding Uid}" HorizontalAlignment="Center" Click="OnEditOrCreateShockerBtnClick">
-													<StackPanel Orientation="Horizontal">
-														<PathIcon Data="{StaticResource edit_regular}" Height="11" Margin="0,0,4,0"/>
-														<TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold">Edit</TextBlock>
-													</StackPanel>
-												</Button>
-											</StackPanel>
-											<CheckBox Name="{Binding Uid}" HorizontalAlignment="Center" IsChecked="{Binding IsSelected}" Click="ShockerSelectClick" FontSize="14">Select</CheckBox>
-										</StackPanel>
-									</Border>
-								</DataTemplate>
-							</ItemsControl.ItemTemplate>
-						</ItemsControl>
-						<TextBlock HorizontalAlignment="Center" FontSize="15" FontWeight="Bold">Overrides</TextBlock>
-						<TextBlock HorizontalAlignment="Center" FontSize="13">Select one or several shockers to edit their overrides</TextBlock>
-					</StackPanel>
-				</ScrollViewer>
+			<ContentPage Header="Shockers" Background="{DynamicResource BackgroundBrush}">
+				<views:ShockersTabView DataContext="{Binding}" />
 			</ContentPage>
-			<ContentPage Header="Settings">
+			<ContentPage Header="Settings" Background="{DynamicResource BackgroundBrush}">
 
 			</ContentPage>
 		</TabbedPage>
