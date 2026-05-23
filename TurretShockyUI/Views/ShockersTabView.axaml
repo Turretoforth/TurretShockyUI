@@ -7,6 +7,10 @@
 			 mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="560"
 			 x:Class="TurretShocky.Views.ShockersTabView"
 			 x:DataType="vm:MainWindowViewModel">
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE -->
+		<vm:DesignMainWindowViewModel/>
+	</Design.DataContext>
 	<ScrollViewer>
 		<StackPanel Margin="8" Orientation="Vertical" Spacing="5">
 			<TextBlock HorizontalAlignment="Center" FontSize="15" FontWeight="Bold">Shockers</TextBlock>

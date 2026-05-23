@@ -5,13 +5,14 @@
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:local="using:TurretShocky.Models"
 		xmlns:views="using:TurretShocky.Views"
-		mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="560"
+		mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="570"
 		x:Class="TurretShocky.Views.MainWindow"
 		x:DataType="vm:MainWindowViewModel"
 		Icon="/Assets/Shocky.ico"
 		Title="TurretShocky"
-		Height="560"
-		Width="650">
+		Height="570"
+		Width="650"
+		CanResize="False">
 
 	<Design.DataContext>
 		<!-- This only sets the DataContext for the previewer in an IDE,
@@ -33,15 +34,15 @@
 			</Button>
 		</StackPanel>
 		<TextBlock HorizontalAlignment="Center" FontSize="12">A better app for the Smart Shock Collar asset</TextBlock>
-		<TabbedPage Background="{DynamicResource BackgroundBrush}">
+		<TabbedPage Background="{DynamicResource BackgroundBrush}" >
 			<ContentPage Header="Main" Background="{DynamicResource BackgroundBrush}">
-				<views:MainTabView DataContext="{Binding}" />
+				<views:MainTabView DataContext="{Binding}" Height="470"/>
 			</ContentPage>
 			<ContentPage Header="Shockers" Background="{DynamicResource BackgroundBrush}">
-				<views:ShockersTabView DataContext="{Binding}" />
+				<views:ShockersTabView DataContext="{Binding}" Height="470"/>
 			</ContentPage>
 			<ContentPage Header="Settings" Background="{DynamicResource BackgroundBrush}">
-
+				<views:SettingsTabView DataContext="{Binding}" Height="470"/>
 			</ContentPage>
 		</TabbedPage>
 	</StackPanel>

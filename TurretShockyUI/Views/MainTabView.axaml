@@ -15,24 +15,13 @@
 		<StackPanel Margin="8" Orientation="Vertical" Spacing="5">
 			<StackPanel Spacing="5" Orientation="Horizontal" HorizontalAlignment="Center">
 				<Button HorizontalAlignment="Center" Margin="0,10,0,10" FontSize="12"
-						FontWeight="Bold" Click="OnOscButtonClick" Background="{DynamicResource TurretBlue}"
+						FontWeight="Bold" Click="OnOscButtonClick" Background="Green"
 						IsEnabled="{Binding IsOscButtonEnabled}">
 					<Button.Content>
 						<StackPanel Orientation="Horizontal">
 							<PathIcon Data="{StaticResource power_regular}"
-										Foreground="Firebrick" Margin="0,0,6,0"></PathIcon>
+										Foreground="White" Margin="0,0,6,0"></PathIcon>
 							<TextBlock VerticalAlignment="Center">Start listening to OSC</TextBlock>
-						</StackPanel>
-					</Button.Content>
-				</Button>
-				<Button HorizontalAlignment="Center" Margin="0,10,0,10" FontSize="12"
-						FontWeight="Bold" Click="OnAppSettingsButtonClick"
-						IsEnabled="{Binding IsOscButtonEnabled}">
-					<Button.Content>
-						<StackPanel Orientation="Horizontal">
-							<PathIcon Data="{StaticResource options_regular}"
-										Margin="0,0,6,0"></PathIcon>
-							<TextBlock VerticalAlignment="Center">Settings</TextBlock>
 						</StackPanel>
 					</Button.Content>
 				</Button>

@@ -2,35 +2,16 @@ using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using Avalonia.VisualTree;
 using System.Collections.ObjectModel;
-using System.Linq;
 using TurretShocky.Models;
+using TurretShocky.ViewModels;
 
-namespace TurretShocky;
+namespace TurretShocky.Views;
 
-public partial class AppSettingsWindow : Window
+public partial class SettingsTabView : UserControl
 {
-    public AppSettingsWindow()
+    public SettingsTabView()
     {
         InitializeComponent();
-    }
-
-    override protected void OnDataContextEndUpdate()
-    {
-        FillInitialValues();
-        base.OnDataContextEndUpdate();
-    }
-
-    private void FillInitialValues()
-    {
-        AppSettings? settings = (DataContext as AppSettings);
-        if (settings != null)
-        {
-            WatchFiles.IsChecked = settings.WatchFiles;
-        }
-        else
-        {
-            WatchFiles.IsChecked = false;
-        }
     }
 
     private void RemoveTriggerBtn(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -47,6 +28,7 @@ public partial class AppSettingsWindow : Window
                 {
                     collection[i].Id = (uint)i;
                 }
+                SaveParameters();
             }
         }
     }
@@ -62,12 +44,13 @@ public partial class AppSettingsWindow : Window
                 TriggerMode = TriggerMode.Contains
             };
             collection.Add(newTrigger);
+            SaveParameters();
         }
     }
 
     private void AddDirectoryBtn(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (sender is Button button && button.DataContext is AppSettings appSettings && appSettings.FilesSettings is ObservableCollection<FileSettings> collection)
+        if (sender is Button button && button.DataContext is MainWindowViewModel vm && vm.Prefs.App.FilesSettings is ObservableCollection<FileSettings> collection)
         {
             FileSettings newDirectory = new()
             {
@@ -77,6 +60,7 @@ public partial class AppSettingsWindow : Window
                 ShockTriggers = []
             };
             collection.Add(newDirectory);
+            SaveParameters();
         }
     }
 
@@ -88,6 +72,7 @@ public partial class AppSettingsWindow : Window
             if (parent != null && parent.ItemsSource is ObservableCollection<FileSettings> collection)
             {
                 collection.Remove(filesSettings);
+                SaveParameters();
             }
         }
     }
@@ -96,10 +81,11 @@ public partial class AppSettingsWindow : Window
     {
         if (sender is Button button && button.DataContext is FileSettings filesSettings)
         {
-            StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            var window = TopLevel.GetTopLevel(this) as Window;
+            window!.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
             {
                 Title = "Select Directory",
-                AllowMultiple = false                
+                AllowMultiple = false
             }).ContinueWith(task =>
             {
                 if (task.Result != null && task.Result.Count > 0)
@@ -108,5 +94,19 @@ public partial class AppSettingsWindow : Window
                 }
             });
         }
+    }
+    private void SaveParameters()
+    {
+        Dispatcher.Invoke(() =>
+        {
+            // Save the preferences (This is needed to ensure the changes are applied, else it's a coin toss if it's made in time)
+            AppSettings appSettings = (DataContext as MainWindowViewModel)!.Prefs.App;
+            (DataContext as MainWindowViewModel)!.Prefs.App = appSettings;
+        });
+    }
+    private void HandlePropertyChanged(object? sender, Avalonia.AvaloniaPropertyChangedEventArgs e)
+    {
+        if (DataContext != null)
+            SaveParameters();
     }
 }

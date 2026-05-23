@@ -31,7 +31,7 @@ namespace TurretShocky.Models
                 new() { Name = "Test Shocker3", Code = "D4B88ABF", IsEnabled = true, Type = ShockerType.OpenShock }
             ];
             _api = new();
-            _app = new();
+            _app = new DesignAppSettings();
         }
 
         private FunType _funType;

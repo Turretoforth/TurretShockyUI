@@ -19,7 +19,6 @@ namespace TurretShocky.Views
     {
         private FileWatcherService? fileWatcherService;
         private readonly Lock lockCooldown = new();
-        private PiShockService? piShockService;
         private bool inCooldown;
         private readonly ConcurrentQueue<ShockTrigger> shockQueue = new();
         public MainTabView()
@@ -418,29 +417,6 @@ namespace TurretShocky.Views
                 Thread.Sleep(1000); // Wait a bit before simulating the touch to be sure to trigger it
                 SimulateTouch();
             }
-        }
-
-        
-        // TODO: We'll change the settings window to a tab
-        private void OnAppSettingsButtonClick(object? sender, RoutedEventArgs e)
-        {
-            // Open the App settings window
-            var appSettingsWindow = new AppSettingsWindow
-            {
-                DataContext = (DataContext as MainWindowViewModel)!.Prefs.App
-            };
-            var window = TopLevel.GetTopLevel(this) as Window;
-            appSettingsWindow.ShowDialog(window!)
-                .ContinueWith(t =>
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        // Save the preferences (This is needed to ensure the changes are applied, else it's a coin toss if it's made in time)
-                        AppSettings appSettings = (DataContext as MainWindowViewModel)!.Prefs.App;
-                        (DataContext as MainWindowViewModel)!.Prefs.App = appSettings;
-                    });
-                }
-            );
         }
     }
 }
