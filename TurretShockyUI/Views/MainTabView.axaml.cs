@@ -17,7 +17,6 @@ namespace TurretShocky.Views
 {
     public partial class MainTabView : UserControl
     {
-        private FileWatcherService? fileWatcherService;
         private readonly Lock lockCooldown = new();
         private bool inCooldown;
         private readonly ConcurrentQueue<ShockTrigger> shockQueue = new();
@@ -55,26 +54,41 @@ namespace TurretShocky.Views
         {
             try
             {
-                (DataContext as MainWindowViewModel)!.IsOscButtonEnabled = false;
+                if((DataContext as MainWindowViewModel)!.IsOscEnabled)
+                {
+                    OSCService.Destroy();
+                    AddLog($"Stopped listening to OSC", Colors.Orange);
+                    FileWatcherService.Destroy();
+                    (DataContext as MainWindowViewModel)!.IsOscEnabled = false;
+                    OSCButtonLabel.Text = "Start listening to OSC";
+                    OSCButton.Background = new SolidColorBrush(Colors.Green);
+                    return;
+                }
+
                 if ((DataContext as MainWindowViewModel)!.Prefs.Api.ApiKey == string.Empty || (DataContext as MainWindowViewModel)!.Prefs.Api.Username == string.Empty)
                 {
                     AddLog("Please configure the API key and username first", Colors.Red);
-                    (DataContext as MainWindowViewModel)!.IsOscButtonEnabled = true;
+                    (DataContext as MainWindowViewModel)!.IsOscEnabled = false;
                     return;
                 }
                 if ((DataContext as MainWindowViewModel)!.Prefs.Shockers.Count == 0)
                 {
                     AddLog("Please configure at least one shocker first", Colors.Red);
-                    (DataContext as MainWindowViewModel)!.IsOscButtonEnabled = true;
+                    (DataContext as MainWindowViewModel)!.IsOscEnabled = false;
                     return;
                 }
+
+                OSCService.Initialize();
+                OSCButtonLabel.Text = "Stop listening to OSC";
+                OSCButton.Background = new SolidColorBrush(Colors.Red);
+                (DataContext as MainWindowViewModel)!.IsOscEnabled = true;
+
                 if ((DataContext as MainWindowViewModel)!.Prefs.App.WatchFiles)
                 {
-                    fileWatcherService = new FileWatcherService();
                     bool shouldQueue = (DataContext as MainWindowViewModel)!.Prefs.App.CooldownBehaviour == CooldownBehaviour.Queue;
                     foreach (var fileSetting in (DataContext as MainWindowViewModel)!.Prefs.App.FilesSettings.Where(f => f.IsEnabled))
                     {
-                        fileWatcherService.AddWatcher(new FileWatcherService.FileWatcher(
+                        FileWatcherService.AddWatcher(new FileWatcher(
                             fileSetting.DirectoryPath,
                             fileSetting.FilePattern,
                             [.. fileSetting.ShockTriggers],
@@ -118,7 +132,7 @@ namespace TurretShocky.Views
                             }
                         ));
                     }
-                    fileWatcherService.StartWatching();
+                    FileWatcherService.StartWatching();
                 }
 
                 OSCService.StartOSC((e, m) =>
@@ -152,7 +166,9 @@ namespace TurretShocky.Views
             }
             catch (Exception ex)
             {
-                (DataContext as MainWindowViewModel)!.IsOscButtonEnabled = true;
+                (DataContext as MainWindowViewModel)!.IsOscEnabled = false;
+                OSCButtonLabel.Text = "Start listening to OSC";
+                OSCButton.Background = new SolidColorBrush(Colors.Green);
                 AddLog($"Error: {ex.Message}", Colors.Red);
                 AddLog($"Error details: {ex}", Colors.LightSalmon);
             }
@@ -390,8 +406,6 @@ namespace TurretShocky.Views
                 Thread.Sleep(1000); // Wait a bit before simulating the touch to be sure to trigger it
                 SimulateTouch();
             }
-
-
         }
 
         private void DoShockersAction(FunType funType, int duration, int intensity, List<Shocker> selectedDevices)
