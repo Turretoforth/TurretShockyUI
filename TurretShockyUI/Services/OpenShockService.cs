@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using TurretShocky.Models;
 
 namespace TurretShocky.Services
 {
@@ -74,7 +74,7 @@ namespace TurretShocky.Services
                     .Select(s => new OpenShocker() { Id = s.Id, IsPaused = s.IsPaused, Name = s.Name })];
         }
 
-        public static async Task SendShockerCommand(string[] shockers, Models.FunType funType, int intensity, int duration)
+        public static async Task SendShockerCommand(string[] shockers, FunType funType, int intensity, int duration)
         {
             if (_currentInstance == null)
             {
@@ -87,8 +87,8 @@ namespace TurretShocky.Services
 
             string convertedType = funType switch
             {
-                Models.FunType.Shock => "Shock",
-                Models.FunType.Vibration => "Vibrate",
+                FunType.Shock => "Shock",
+                FunType.Vibration => "Vibrate",
                 _ => throw new ArgumentOutOfRangeException(nameof(funType), "Invalid fun type specified for OpenShock"),
             };
 
@@ -121,6 +121,22 @@ namespace TurretShocky.Services
                 }
                 throw new HttpRequestException($"Failed to send shocker command(s): {problem?.Title ?? response.ReasonPhrase} (Status: {problem?.Status ?? ((int)response.StatusCode)})");
             }
+        }
+
+        public static async Task SendShockerCommand(IEnumerable<ShockerAction> shockerActions)
+        {
+            // Group shocker actions by their parameters (except code) to minimize the number of API calls
+            shockerActions.GroupBy(action => (action.FunType, action.Duration, action.Intensity))
+                .ToList()
+                .ForEach(group =>
+                {
+                    string[] shockerIds = [.. group.Select(action => action.Code)];
+                    FunType funType = group.Key.FunType;
+                    int intensity = group.Key.Intensity; // Use max intensity for the group
+                    int duration = group.Key.Duration * 1000; // OpenShock API expects duration in milliseconds
+                    // Send the command for this group
+                    SendShockerCommand(shockerIds, funType, intensity, duration).Wait();
+                });
         }
     }
 

@@ -26,12 +26,14 @@ namespace TurretShocky.Models
             _duration = 1;
             _rouletteMode = false;
             _shockers = [
-                new() { Name = "Test Shocker1", Code = "A2B66ABF", IsEnabled = true, Type = ShockerType.PiShock },
-                new() { Name = "Test Shocker2", Code = "C6B22ABF", IsEnabled = true, Type = ShockerType.PiShock },
-                new() { Name = "Test Shocker3", Code = "D4B88ABF", IsEnabled = true, Type = ShockerType.OpenShock }
+                new() { Name = "Test Shocker1", Code = "A2B66ABF", IsEnabled = true, Type = ShockerType.PiShock, Overrides = [] },
+                new() { Name = "Test Shocker2", Code = "C6B22ABF", IsEnabled = true, Type = ShockerType.PiShock, Overrides = [] },
+                new() { Name = "Test Shocker3", Code = "D4B88ABF", IsEnabled = true, Type = ShockerType.OpenShock, 
+                    Overrides = [ new ShockerOverride() { OverrideType=ShockerOverrideType.Duration, OverrideMode=ShockerOverrideMode.Exactly, OverrideValue = 2 } ]
+                }
             ];
             _api = new();
-            _app = new();
+            _app = new DesignAppSettings();
         }
 
         private FunType _funType;
