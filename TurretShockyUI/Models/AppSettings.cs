@@ -56,6 +56,26 @@ namespace TurretShocky.Models
                 SetProperty(ref _delayTrigger, value);
             }
         }
+
+        private int _oscListenerPort = 9001;
+        public int OscListenerPort
+        {
+            get => _oscListenerPort;
+            set
+            {
+                SetProperty(ref _oscListenerPort, value);
+            }
+        }
+
+        private int _oscSenderPort = 9000;
+        public int OscSenderPort
+        {
+            get => _oscSenderPort;
+            set
+            {
+                SetProperty(ref _oscSenderPort, value);
+            }
+        }
     }
 
     public enum CooldownBehaviour
@@ -70,6 +90,8 @@ namespace TurretShocky.Models
         {
             WatchFiles = true;
             CooldownBehaviour = CooldownBehaviour.Ignore;
+            OscListenerPort = 9001;
+            OscSenderPort = 9000;
             FilesSettings =
             [
                 new() {

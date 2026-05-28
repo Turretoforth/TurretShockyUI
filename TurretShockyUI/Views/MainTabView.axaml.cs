@@ -78,15 +78,15 @@ namespace TurretShocky.Views
                     return;
                 }
 
-                OSCService.Initialize();
+                OSCService.Initialize(Prefs.App.OscListenerPort, Prefs.App.OscSenderPort);
                 OSCButtonLabel.Text = "Stop listening to OSC";
                 OSCButton.Background = new SolidColorBrush(Colors.Red);
                 (DataContext as MainWindowViewModel)!.IsOscEnabled = true;
 
-                if ((DataContext as MainWindowViewModel)!.Prefs.App.WatchFiles)
+                if (Prefs.App.WatchFiles)
                 {
-                    bool shouldQueue = (DataContext as MainWindowViewModel)!.Prefs.App.CooldownBehaviour == CooldownBehaviour.Queue;
-                    foreach (var fileSetting in (DataContext as MainWindowViewModel)!.Prefs.App.FilesSettings.Where(f => f.IsEnabled))
+                    bool shouldQueue = Prefs.App.CooldownBehaviour == CooldownBehaviour.Queue;
+                    foreach (FileSettings? fileSetting in Prefs.App.FilesSettings.Where(f => f.IsEnabled))
                     {
                         FileWatcherService.AddWatcher(new FileWatcher(
                             fileSetting.DirectoryPath,
@@ -148,7 +148,7 @@ namespace TurretShocky.Views
                     }
                 });
 
-                AddLog($"Started listening to OSC", Colors.Green);
+                AddLog($"Started listening to OSC on port {Prefs.App.OscListenerPort} and sending to port {Prefs.App.OscSenderPort}", Colors.Green);
                 SendSavedPrefs();
 
                 Task.Run(async () =>

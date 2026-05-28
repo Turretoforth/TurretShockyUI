@@ -18,6 +18,14 @@
 			<Border Margin="10" BorderThickness="1" BorderBrush="{DynamicResource TurretBlue}" CornerRadius="5" Width="450" Padding="5">
 				<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
 					<TextBlock FontSize="16" FontWeight="Bold" HorizontalAlignment="Center">General</TextBlock>
+					<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5">
+						<TextBlock FontSize="13" VerticalAlignment="Center">OSC Sending Port (default 9000)</TextBlock>
+						<TextBox Text="{Binding Prefs.App.OscSenderPort}" FontSize="13" Width="60" PropertyChanged="HandlePropertyChanged"/>
+					</StackPanel>
+					<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5" Margin="0,0,0,5">
+						<TextBlock FontSize="13" Margin="0,0,4,0" VerticalAlignment="Center">OSC Listener Port (default 9001)</TextBlock>
+						<TextBox Text="{Binding Prefs.App.OscListenerPort}" FontSize="13" Width="60" PropertyChanged="HandlePropertyChanged"/>
+					</StackPanel>
 					<CheckBox Name="ExtraOscMessages" Margin="10" IsChecked="{Binding Prefs.App.ShowExtraOscMessages}" HorizontalAlignment="Center" PropertyChanged="HandlePropertyChanged">
 						<TextBlock FontSize="13" Text="Show extra OSC messages received by the program"></TextBlock>
 					</CheckBox>
