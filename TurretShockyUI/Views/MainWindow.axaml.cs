@@ -23,7 +23,6 @@ namespace TurretShocky.Views
         {
             InitializeComponent();
             Preferences.Initialize();
-            OSCService.Initialize();
 
             if (!Design.IsDesignMode)
             {
@@ -76,6 +75,7 @@ namespace TurretShocky.Views
         protected override void OnClosing(WindowClosingEventArgs e)
         {
             OSCService.Destroy();
+            FileWatcherService.Destroy();
             base.OnClosing(e);
         }
 
