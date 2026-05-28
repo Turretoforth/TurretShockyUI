@@ -75,13 +75,21 @@
 			<TextBlock HorizontalAlignment="Center" FontSize="15" FontWeight="Bold">Overrides</TextBlock>
 			<TextBlock Name="TextOverride" HorizontalAlignment="Center" FontSize="13">Select one or several shockers to edit their overrides</TextBlock>
 			<Border Name="OverrideSection" IsVisible="False" BorderBrush="{DynamicResource TurretBlue}" BorderThickness="2" CornerRadius="3" Padding="8">
-				<StackPanel Orientation="Vertical" VerticalAlignment="Center">
+				<StackPanel Orientation="Vertical" VerticalAlignment="Center" Spacing="5">
 					<StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="4">
-						<CheckBox Name="OverrideDuration" IsCheckedChanged="OverrideDuration_IsCheckedChanged">Shock Duration: Force to</CheckBox>
+						<CheckBox Name="OverrideDuration" IsCheckedChanged="OverrideDuration_IsCheckedChanged">Duration: Force to</CheckBox>
 						<ComboBox Name="OverrideDurationValue" SelectionChanged="OverrideDurationValue_SelectionChanged" FontSize="13" IsEnabled="False">
 						</ComboBox>
 						<TextBlock VerticalAlignment="Center" FontSize="13">seconds</TextBlock>
 						<ComboBox Name="OverrideDurationMode" SelectionChanged="OverrideDurationMode_SelectionChanged" FontSize="13" IsEnabled="False">
+						</ComboBox>
+					</StackPanel>
+					<StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="4">
+						<CheckBox Name="OverrideIntensity" IsCheckedChanged="OverrideIntensity_IsCheckedChanged">Intensity: Force to</CheckBox>
+						<ComboBox Name="OverrideIntensityValue" SelectionChanged="OverrideIntensityValue_SelectionChanged" FontSize="13" IsEnabled="False">
+						</ComboBox>
+						<TextBlock VerticalAlignment="Center" FontSize="13">%</TextBlock>
+						<ComboBox Name="OverrideIntensityMode" SelectionChanged="OverrideIntensityMode_SelectionChanged" FontSize="13" IsEnabled="False">
 						</ComboBox>
 					</StackPanel>
 					<Button HorizontalAlignment="Center" Margin="0,10,0,0" Name="SaveOverridesBtn" Click="SaveOverridesBtn_Click"><TextBlock>Save overrides</TextBlock></Button>

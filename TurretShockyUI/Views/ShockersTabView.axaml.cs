@@ -29,6 +29,12 @@ public partial class ShockersTabView : UserControl
         OverrideDurationMode.SelectedIndex = 0;
         OverrideDurationValue.ItemsSource = Enumerable.Range(1, 15).ToList();
         OverrideDurationValue.SelectedIndex = 0;
+        OverrideIntensity.IsChecked = false;
+        OverrideIntensityMode.ItemsSource = new List<string> { "Exactly", "Minimum", "Maximum" };
+        OverrideIntensityMode.SelectedIndex = 0;
+        OverrideIntensityValue.ItemsSource = Enumerable.Range(1, 100).ToList();
+        OverrideIntensityValue.SelectedIndex = 0;
+
     }
 
     private void AddLog(string message, Color color)
@@ -220,6 +226,9 @@ public partial class ShockersTabView : UserControl
                     OverrideDuration.IsChecked = null;
                     OverrideDurationValue.SelectedIndex = 0;
                     OverrideDurationMode.SelectedIndex = 0;
+                    OverrideIntensity.IsChecked = null;
+                    OverrideIntensityValue.SelectedIndex = 0;
+                    OverrideIntensityMode.SelectedIndex = 0;
                 }
                 else
                 {
@@ -241,6 +250,26 @@ public partial class ShockersTabView : UserControl
                         OverrideDuration.IsChecked = false;
                         OverrideDurationValue.SelectedIndex = 0;
                         OverrideDurationMode.SelectedIndex = 0;
+                    }
+
+                    var intensityOverride = shockers.Where(s => selectedShockersGuids.Contains(s.Uid)).SelectMany(s => s.Overrides ?? []).FirstOrDefault(o => o.OverrideType == ShockerOverrideType.Intensity);
+                    if (intensityOverride != null)
+                    {
+                        OverrideIntensity.IsChecked = true;
+                        OverrideIntensityValue.SelectedValue = intensityOverride.OverrideValue;
+                        OverrideIntensityMode.SelectedIndex = intensityOverride.OverrideMode switch
+                        {
+                            ShockerOverrideMode.Exactly => 0,
+                            ShockerOverrideMode.Minimum => 1,
+                            ShockerOverrideMode.Maximum => 2,
+                            _ => 0
+                        };
+                    }
+                    else
+                    {
+                        OverrideIntensity.IsChecked = false;
+                        OverrideIntensityValue.SelectedIndex = 0;
+                        OverrideIntensityMode.SelectedIndex = 0;
                     }
                 }
             }
@@ -264,7 +293,7 @@ public partial class ShockersTabView : UserControl
         if (overrides.Any(o => o.OverrideType == ShockerOverrideType.Duration) && (OverrideDuration.IsChecked ?? false))
         {
             var durationOverride = overrides.First(o => o.OverrideType == ShockerOverrideType.Duration);
-            durationOverride.OverrideMode = OverrideDurationMode.SelectedValue switch
+            durationOverride.OverrideMode = OverrideDurationMode.SelectedIndex switch
             {
                 0 => ShockerOverrideMode.Exactly,
                 1 => ShockerOverrideMode.Minimum,
@@ -278,7 +307,7 @@ public partial class ShockersTabView : UserControl
             overrides.Add(new ShockerOverride
             {
                 OverrideType = ShockerOverrideType.Duration,
-                OverrideMode = OverrideDurationMode.SelectedValue switch
+                OverrideMode = OverrideDurationMode.SelectedIndex switch
                 {
                     0 => ShockerOverrideMode.Exactly,
                     1 => ShockerOverrideMode.Minimum,
@@ -302,6 +331,58 @@ public partial class ShockersTabView : UserControl
     private void OverrideDurationMode_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         OverrideDurationCacheValues();
+    }
+
+    private void OverrideIntensity_IsCheckedChanged(object? sender, RoutedEventArgs e)
+    {
+        OverrideIntensityValue.IsEnabled = OverrideIntensity.IsChecked ?? false;
+        OverrideIntensityMode.IsEnabled = OverrideIntensity.IsChecked ?? false;
+        OverrideIntensityCacheValues();
+    }
+
+    private void OverrideIntensityCacheValues()
+    {
+        if (overrides.Any(o => o.OverrideType == ShockerOverrideType.Intensity) && (OverrideIntensity.IsChecked ?? false))
+        {
+            var intensityOverride = overrides.First(o => o.OverrideType == ShockerOverrideType.Intensity);
+            intensityOverride.OverrideMode = OverrideIntensityMode.SelectedIndex switch
+            {
+                0 => ShockerOverrideMode.Exactly,
+                1 => ShockerOverrideMode.Minimum,
+                2 => ShockerOverrideMode.Maximum,
+                _ => ShockerOverrideMode.Exactly
+            };
+            intensityOverride.OverrideValue = OverrideIntensityValue.SelectedValue != null ? (int)OverrideIntensityValue.SelectedValue : 1;
+        }
+        else if (OverrideIntensity.IsChecked ?? false)
+        {
+            overrides.Add(new ShockerOverride
+            {
+                OverrideType = ShockerOverrideType.Intensity,
+                OverrideMode = OverrideIntensityMode.SelectedIndex switch
+                {
+                    0 => ShockerOverrideMode.Exactly,
+                    1 => ShockerOverrideMode.Minimum,
+                    2 => ShockerOverrideMode.Maximum,
+                    _ => ShockerOverrideMode.Exactly
+                },
+                OverrideValue = OverrideIntensityValue.SelectedValue != null ? (int)OverrideIntensityValue.SelectedValue : 1
+            });
+        }
+        else if (overrides.Any(o => o.OverrideType == ShockerOverrideType.Intensity))
+        {
+            overrides.Remove(overrides.First(o => o.OverrideType == ShockerOverrideType.Intensity));
+        }
+    }
+
+    private void OverrideIntensityValue_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        OverrideIntensityCacheValues();
+    }
+
+    private void OverrideIntensityMode_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        OverrideIntensityCacheValues();
     }
 
     private void SaveOverridesBtn_Click(object? sender, RoutedEventArgs e)
