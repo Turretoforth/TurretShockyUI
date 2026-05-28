@@ -3,6 +3,7 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Threading;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using TurretShocky.Models;
 using TurretShocky.Services;
@@ -12,9 +13,22 @@ namespace TurretShocky.Views;
 
 public partial class ShockersTabView : UserControl
 {
+    private List<ShockerOverride> overrides = [];
+    private List<Guid> selectedShockersGuids = [];
+
     public ShockersTabView()
     {
         InitializeComponent();
+        InitializeOverrideControls();
+    }
+
+    private void InitializeOverrideControls()
+    {
+        OverrideDuration.IsChecked = false;
+        OverrideDurationMode.ItemsSource = new List<string> { "Exactly", "Minimum", "Maximum" };
+        OverrideDurationMode.SelectedIndex = 0;
+        OverrideDurationValue.ItemsSource = Enumerable.Range(1, 15).ToList();
+        OverrideDurationValue.SelectedIndex = 0;
     }
 
     private void AddLog(string message, Color color)
@@ -180,15 +194,124 @@ public partial class ShockersTabView : UserControl
 
     private void ShockerSelectClick(object? sender, RoutedEventArgs e)
     {
-        // Get the name of the shocker to enable/disable
+        // Get the name of the (un)selected shocker
         var shockers = (DataContext as MainWindowViewModel)!.Prefs.Shockers;
         Shocker? selectedShocker = shockers.FirstOrDefault(s => s.Uid.ToString() == (sender as CheckBox)!.Name);
         if (selectedShocker != null)
         {
             // Toggle the selected state of the shocker
-            selectedShocker.IsSelected = (sender as CheckBox)!.IsChecked ?? false;
-            // Update the DataContext
-            (DataContext as MainWindowViewModel)!.Prefs.Shockers = shockers;
+            if((sender as CheckBox)!.IsChecked ?? false)
+            {
+                selectedShockersGuids.Add(selectedShocker.Uid);
+            }
+            else
+            {
+                selectedShockersGuids.Remove(selectedShocker.Uid);
+            }
+
+            if (selectedShockersGuids.Count != 0)
+            {
+                TextOverride.Text = $"Editing overrides for {string.Join(", ", shockers.Where(s => selectedShockersGuids.Contains(s.Uid)).Select(s => s.Name))}";
+                OverrideSection.IsVisible = true;
+                // Display the override values for the selected shockers (if they exist)
+                // If multiple shockers are selected, only display the override values if they are the same for all selected shockers, otherwise display a placeholder value
+                if (shockers.Where(s => selectedShockersGuids.Contains(s.Uid)).SelectMany(s => s.Overrides ?? []).GroupBy(o => o.OverrideType).Any(g => g.Select(o => o.OverrideValue).Distinct().Count() > 1))
+                {
+                    OverrideDuration.IsChecked = null;
+                    OverrideDurationValue.SelectedIndex = 0;
+                    OverrideDurationMode.SelectedIndex = 0;
+                }
+                else
+                {
+                    var durationOverride = shockers.Where(s => selectedShockersGuids.Contains(s.Uid)).SelectMany(s => s.Overrides ?? []).FirstOrDefault(o => o.OverrideType == ShockerOverrideType.Duration);
+                    if (durationOverride != null)
+                    {
+                        OverrideDuration.IsChecked = true;
+                        OverrideDurationValue.SelectedValue = durationOverride.OverrideValue;
+                        OverrideDurationMode.SelectedIndex = durationOverride.OverrideMode switch
+                        {
+                            ShockerOverrideMode.Exactly => 0,
+                            ShockerOverrideMode.Minimum => 1,
+                            ShockerOverrideMode.Maximum => 2,
+                            _ => 0
+                        };
+                    }
+                    else
+                    {
+                        OverrideDuration.IsChecked = false;
+                        OverrideDurationValue.SelectedIndex = 0;
+                        OverrideDurationMode.SelectedIndex = 0;
+                    }
+                }
+            }
+            else
+            {
+                TextOverride.Text = "Select one or several shockers to edit their overrides";
+                OverrideSection.IsVisible = false;
+            }
         }
+    }
+
+    private void OverrideDuration_IsCheckedChanged(object? sender, RoutedEventArgs e)
+    {
+        OverrideDurationValue.IsEnabled = OverrideDuration.IsChecked ?? false;
+        OverrideDurationMode.IsEnabled = OverrideDuration.IsChecked ?? false;
+        OverrideDurationCacheValues();
+    }
+
+    private void OverrideDurationCacheValues()
+    {
+        if (overrides.Any(o => o.OverrideType == ShockerOverrideType.Duration) && (OverrideDuration.IsChecked ?? false))
+        {
+            var durationOverride = overrides.First(o => o.OverrideType == ShockerOverrideType.Duration);
+            durationOverride.OverrideMode = OverrideDurationMode.SelectedValue switch
+            {
+                0 => ShockerOverrideMode.Exactly,
+                1 => ShockerOverrideMode.Minimum,
+                2 => ShockerOverrideMode.Maximum,
+                _ => ShockerOverrideMode.Exactly
+            };
+            durationOverride.OverrideValue = OverrideDurationValue.SelectedValue != null ? (int)OverrideDurationValue.SelectedValue : 1;
+        }
+        else if (OverrideDuration.IsChecked ?? false)
+        {
+            overrides.Add(new ShockerOverride
+            {
+                OverrideType = ShockerOverrideType.Duration,
+                OverrideMode = OverrideDurationMode.SelectedValue switch
+                {
+                    0 => ShockerOverrideMode.Exactly,
+                    1 => ShockerOverrideMode.Minimum,
+                    2 => ShockerOverrideMode.Maximum,
+                    _ => ShockerOverrideMode.Exactly
+                },
+                OverrideValue = OverrideDurationValue.SelectedValue != null ? (int)OverrideDurationValue.SelectedValue : 1
+            });
+        }
+        else if (overrides.Any(o => o.OverrideType == ShockerOverrideType.Duration))
+        {
+            overrides.Remove(overrides.First(o => o.OverrideType == ShockerOverrideType.Duration));
+        }
+    }
+
+    private void OverrideDurationValue_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        OverrideDurationCacheValues();
+    }
+
+    private void OverrideDurationMode_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        OverrideDurationCacheValues();
+    }
+
+    private void SaveOverridesBtn_Click(object? sender, RoutedEventArgs e)
+    {
+        // Update the shocker with the new overrides
+        var shockers = (DataContext as MainWindowViewModel)!.Prefs.Shockers;
+        foreach (Shocker selectedShocker in shockers.Where(s => selectedShockersGuids.Contains(s.Uid)))
+        {
+            selectedShocker.Overrides = [..overrides];
+        }
+        (DataContext as MainWindowViewModel)!.Prefs.Shockers = shockers;
     }
 }

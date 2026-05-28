@@ -359,34 +359,7 @@ namespace TurretShocky.Views
                     AddLog($"Roulette mode enabled, selected {selectedDevices[0].Name}", Colors.LightBlue);
                 }
 
-                if (selectedDevices.Any(s => s.Type == ShockerType.PiShock))
-                {
-                    AddLog($"Triggering {selectedDevices.Count(s => s.Type == ShockerType.PiShock)} PiShock device(s)", Colors.Yellow);
-                    PiShockService.DoPiShockOperations(funType, duration, randomIntensity, [.. selectedDevices.Where(s => s.Type == ShockerType.PiShock).Select(s => s.Code)])
-                        .ContinueWith(r =>
-                        {
-                            foreach (var shocker in r.Result)
-                            {
-                                if (!shocker.Value.Success)
-                                {
-                                    AddLog($"Error triggering PiShock {shocker.Key}: {shocker.Value.Message}", Colors.Red);
-                                }
-                            }
-                        });
-                }
-                if (selectedDevices.Any(s => s.Type == ShockerType.OpenShock))
-                {
-                    AddLog($"Triggering {selectedDevices.Count(s => s.Type == ShockerType.OpenShock)} OpenShock device(s)", Colors.Yellow);
-                    OpenShockService.SendShockerCommand([.. selectedDevices.Where(s => s.Type == ShockerType.OpenShock).Select(s => s.Code)],
-                        funType, randomIntensity, duration * 1000) // For OpenShock, duration is in milliseconds
-                    .ContinueWith(r =>
-                    {
-                        if (r.IsFaulted)
-                        {
-                            AddLog($"Error triggering OpenShock: {r.Exception?.Message}", Colors.Red);
-                        }
-                    });
-                }
+                DoShockersAction(funType, duration, randomIntensity, selectedDevices);
 
                 Dispatcher.Invoke(() =>
                 {
@@ -416,6 +389,74 @@ namespace TurretShocky.Views
                 AddLog($"Processing queued trigger: '{trigger.TriggerText}'. Simulating touch!", Colors.Firebrick);
                 Thread.Sleep(1000); // Wait a bit before simulating the touch to be sure to trigger it
                 SimulateTouch();
+            }
+
+
+        }
+
+        private void DoShockersAction(FunType funType, int duration, int intensity, List<Shocker> selectedDevices)
+        {
+            List<ShockerAction> shockerActions = [];
+            foreach (Shocker shocker in selectedDevices)
+            {
+                int calculatedDuration = duration;
+                int calculatedIntensity = intensity;
+                ShockerOverride? durationOverride = shocker.Overrides?.FirstOrDefault(o => o.OverrideType == ShockerOverrideType.Duration);
+                ShockerOverride? intensityOverride = shocker.Overrides?.FirstOrDefault(o => o.OverrideType == ShockerOverrideType.Intensity);
+                if (durationOverride != null
+                    && ((durationOverride.OverrideMode == ShockerOverrideMode.Minimum && duration < durationOverride.OverrideValue)
+                        || (durationOverride.OverrideMode == ShockerOverrideMode.Maximum && duration > durationOverride.OverrideValue)
+                        || (durationOverride.OverrideMode == ShockerOverrideMode.Exactly)))
+                {
+                    calculatedDuration = durationOverride.OverrideValue;
+                    AddLog($"Applying duration override for {shocker.Name}: {calculatedDuration}s", Colors.LightBlue);
+                }
+
+                if (intensityOverride != null
+                    && ((intensityOverride.OverrideMode == ShockerOverrideMode.Minimum && intensity < intensityOverride.OverrideValue)
+                        || (intensityOverride.OverrideMode == ShockerOverrideMode.Maximum && intensity > intensityOverride.OverrideValue)
+                        || (intensityOverride.OverrideMode == ShockerOverrideMode.Exactly)))
+                {
+                    calculatedIntensity = intensityOverride.OverrideValue;
+                    AddLog($"Applying intensity override for {shocker.Name}: {calculatedIntensity}", Colors.LightBlue);
+                }
+                shockerActions.Add(new ShockerAction
+                {
+                    Code = shocker.Code,
+                    Type = shocker.Type,
+                    FunType = funType,
+                    Duration = calculatedDuration,
+                    Intensity = calculatedIntensity
+                });
+            }
+
+            if (shockerActions.Any(a => a.Type == ShockerType.PiShock))
+            {
+                AddLog($"Triggering {shockerActions.Count(s => s.Type == ShockerType.PiShock)} PiShock device(s)", Colors.Yellow);
+                PiShockService.DoPiShockOperations(shockerActions.Where(a => a.Type == ShockerType.PiShock))
+                    .ContinueWith(r =>
+                    {
+                        foreach (var shocker in r.Result)
+                        {
+                            if (!shocker.Value.Success)
+                            {
+                                AddLog($"Error triggering PiShock {shocker.Key}: {shocker.Value.Message}", Colors.Red);
+                            }
+                        }
+                    });
+            }
+
+            if (shockerActions.Any(a => a.Type == ShockerType.OpenShock))
+            {
+                AddLog($"Triggering {shockerActions.Count(s => s.Type == ShockerType.OpenShock)} OpenShock device(s)", Colors.Yellow);
+                OpenShockService.SendShockerCommand(shockerActions.Where(s => s.Type == ShockerType.OpenShock))
+                .ContinueWith(r =>
+                {
+                    if (r.IsFaulted)
+                    {
+                        AddLog($"Error triggering OpenShock: {r.Exception?.Message}", Colors.Red);
+                    }
+                });
             }
         }
     }

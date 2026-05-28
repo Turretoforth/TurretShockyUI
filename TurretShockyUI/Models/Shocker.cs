@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
+using System.Collections.ObjectModel;
 
 namespace TurretShocky.Models
 {
@@ -12,7 +13,7 @@ namespace TurretShocky.Models
             _code = string.Empty;
             _type = ShockerType.PiShock;
             _isEnabled = false;
-            _isSelected = false;
+            _overrides = null;
         }
 
         private Guid _uid;
@@ -65,14 +66,11 @@ namespace TurretShocky.Models
             }
         }
 
-        private bool _isSelected;
-        public bool IsSelected
+        private ObservableCollection<ShockerOverride>? _overrides;
+        public ObservableCollection<ShockerOverride>? Overrides
         {
-            get => _isSelected;
-            set
-            {
-                SetProperty(ref _isSelected, value);
-            }
+            get => _overrides;
+            set => SetProperty(ref _overrides, value);
         }
     }
 

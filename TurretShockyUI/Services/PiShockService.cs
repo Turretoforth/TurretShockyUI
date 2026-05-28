@@ -78,6 +78,19 @@ namespace TurretShocky.Services
             return result;
         }
 
+        public static async Task<Dictionary<string, OperationResult>> DoPiShockOperations(IEnumerable<ShockerAction> shockerActions)
+        {
+            var result = new Dictionary<string, OperationResult>();
+            ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5 };
+            await Parallel.ForEachAsync(shockerActions, parallelOptions, async (shockerAction, cancellationToken) =>
+            {
+                var shockerResult = await DoPiShockOperation(shockerAction.FunType, shockerAction.Duration, shockerAction.Intensity, shockerAction.Code);
+                result.Add(shockerAction.Code, shockerResult);
+            });
+
+            return result;
+        }
+
         public class OperationResult
         {
             public OperationResult()
