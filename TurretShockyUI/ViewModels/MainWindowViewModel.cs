@@ -106,10 +106,10 @@ namespace TurretShocky.ViewModels
 
         public void AddLog(string message, Color color)
         {
-            LogEntries.Add(new LogEntry($"[{DateTime.Now:HH:mm:ss}] {message}", color));
+            LogEntries.Insert(0,new LogEntry($"[{DateTime.Now:HH:mm:ss}] {message}", color));
             if (LogEntries.Count > 10)
             {
-                LogEntries.RemoveAt(0);
+                LogEntries.RemoveAt(LogEntries.Count - 1);
             }
         }
     }

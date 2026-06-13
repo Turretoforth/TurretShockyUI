@@ -17,7 +17,7 @@ namespace TurretShocky.Services
         public static void Initialize(int remotePort = 9000, int localPort = 9001)
         {
             _currentInstance = new OSCService();
-            _oscClient = new VRChatOSC(remotePort);
+            _oscClient = new VRChatOSC();
             _remotePort = remotePort;
             _localPort = localPort;
         }

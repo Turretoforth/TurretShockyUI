@@ -19,11 +19,11 @@
 				<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
 					<TextBlock FontSize="16" FontWeight="Bold" HorizontalAlignment="Center">General</TextBlock>
 					<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5">
-						<TextBlock FontSize="13" VerticalAlignment="Center">OSC Sending Port (default 9000)</TextBlock>
+						<TextBlock FontSize="13" VerticalAlignment="Center">OSC Sending Port (default 9001)</TextBlock>
 						<TextBox Text="{Binding Prefs.App.OscSenderPort}" FontSize="13" Width="60" PropertyChanged="HandlePropertyChanged"/>
 					</StackPanel>
 					<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5" Margin="0,0,0,5">
-						<TextBlock FontSize="13" Margin="0,0,4,0" VerticalAlignment="Center">OSC Listener Port (default 9001)</TextBlock>
+						<TextBlock FontSize="13" Margin="0,0,4,0" VerticalAlignment="Center">OSC Listener Port (default 9000)</TextBlock>
 						<TextBox Text="{Binding Prefs.App.OscListenerPort}" FontSize="13" Width="60" PropertyChanged="HandlePropertyChanged"/>
 					</StackPanel>
 					<CheckBox Name="ExtraOscMessages" Margin="10" IsChecked="{Binding Prefs.App.ShowExtraOscMessages}" HorizontalAlignment="Center" PropertyChanged="HandlePropertyChanged">
@@ -64,61 +64,114 @@
 					<ItemsControl Name="FilesSettingsControl" ItemsSource="{Binding Prefs.App.FilesSettings}">
 						<ItemsControl.ItemTemplate>
 							<DataTemplate>
-								<Border BorderBrush="{DynamicResource BorderBrush}" Background="{DynamicResource BackgroundBrush}" BorderThickness="1" CornerRadius="3" Margin="5" Padding="5">
-									<StackPanel Orientation="Vertical">
-										<StackPanel Orientation="Horizontal" Margin="5" Spacing="3">
-											<TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold" Margin="0,0,5,0">Directory:</TextBlock>
-											<TextBox VerticalAlignment="Center" FontSize="13" Width="250" Text="{Binding Path=DirectoryPath}"  PropertyChanged="HandlePropertyChanged"/>
-											<Button Click="BrowseForDirectoryBtn">
-												<TextBlock FontSize="12" FontWeight="Bold">Browse...</TextBlock>
-											</Button>
-										</StackPanel>
-										<StackPanel Orientation="Horizontal" Margin="5">
-											<TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold" Margin="0,0,5,0">File pattern:</TextBlock>
-											<TextBox FontSize="13" Width="317" Text="{Binding Path=FilePattern}"  PropertyChanged="HandlePropertyChanged"/>
-										</StackPanel>
-										<CheckBox Name="FileEnabled" Margin="5" IsChecked="{Binding Path=IsEnabled}" HorizontalAlignment="Center" PropertyChanged="HandlePropertyChanged">
-											<TextBlock FontSize="13" Text="Enabled"></TextBlock>
-										</CheckBox>
-										<TextBlock FontSize="12" FontWeight="Bold" Margin="5" HorizontalAlignment="Center">Triggers</TextBlock>
-										<ItemsControl Name="TriggersFileControl" ItemsSource="{Binding Path=ShockTriggers}">
-											<ItemsControl.ItemTemplate>
-												<DataTemplate>
-													<Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="3" Margin="5" Padding="5">
-														<StackPanel Orientation="Vertical">
-															<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
-																<TextBlock FontSize="12" FontWeight="Bold" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Center">Line trigger mode:</TextBlock>
-																<ComboBox FontSize="13" SelectedIndex="{Binding Path=TriggerMode}" PropertyChanged="HandlePropertyChanged">
-																	<ComboBox.Items>
-																		<ComboBoxItem Content="Contains"/>
-																		<ComboBoxItem Content="Starts with" />
-																		<ComboBoxItem Content="Ends with" />
-																		<ComboBoxItem Content="Regex" />
-																	</ComboBox.Items>
-																</ComboBox>
-															</StackPanel>
-															<StackPanel Orientation="Horizontal" Margin="5" HorizontalAlignment="Center">
-																<TextBlock FontSize="12" FontWeight="Bold" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Center">Trigger:</TextBlock>
-																<TextBox FontSize="13" Width="300" Text="{Binding Path=TriggerText}"  PropertyChanged="HandlePropertyChanged"/>
-															</StackPanel>
-															<Button Background="Red" HorizontalAlignment="Center" Click="RemoveTriggerBtn">
-																<TextBlock FontSize="12" FontWeight="Bold">Remove</TextBlock>
-															</Button>
+								<StackPanel>
+									<Border BorderBrush="{DynamicResource TurretBlue}" Background="{DynamicResource BackgroundBrush}" BorderThickness="1" CornerRadius="3" Margin="5" Padding="5">
+										<StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+											<StackPanel Spacing="5" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+												<TextBlock MaxWidth="280" TextTrimming="PathSegmentEllipsis" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">
+													<Run FontWeight="Bold">Directory:</Run>
+													<Run Text="{Binding Path=DirectoryPath}" />
+												</TextBlock>
+												<Button VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="12">
+													<StackPanel Orientation="Horizontal">
+														<PathIcon Data="{StaticResource edit_regular}" Height="11" Margin="0,0,4,0"/>
+														<TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold">Edit</TextBlock>
+													</StackPanel>
+												</Button>
+												<Button VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="13" Background="Red">
+													<StackPanel Orientation="Horizontal">
+														<PathIcon Data="{StaticResource delete_regular}" Height="14"/>
+													</StackPanel>
+												</Button>
+											</StackPanel>
+											<TextBlock FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">
+												<Run FontWeight="Bold">File pattern:</Run>
+												<Run Text="{Binding Path=FilePattern}" />
+											</TextBlock>
+											<StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="5">
+												<CheckBox Name="FileEnabled" Margin="5" IsChecked="{Binding Path=IsEnabled}" HorizontalAlignment="Center" PropertyChanged="HandlePropertyChanged">
+													<TextBlock FontSize="13" Text="Enabled"></TextBlock>
+												</CheckBox>
+											</StackPanel>
+											<StackPanel Spacing="10" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+												<TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="13" FontWeight="Bold">Triggers</TextBlock>
+												<Button VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="12">
+													<StackPanel Orientation="Horizontal">
+														<PathIcon Data="{StaticResource edit_regular}" Height="11"/>
+													</StackPanel>
+												</Button>
+											</StackPanel>
+											<ItemsControl Name="TriggersFileDisplayControl" ItemsSource="{Binding Path=ShockTriggers}">
+												<ItemsControl.ItemTemplate>
+													<DataTemplate>
+														<StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="5">
+															<TextBlock FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">
+																<Run FontWeight="Bold">Mode:</Run>
+																<Run Text="{Binding Path=TriggerMode}" />
+															</TextBlock>
+															<TextBlock FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">
+																<Run FontWeight="Bold">Text:</Run>
+																<Run Text="{Binding Path=TriggerText}" />
+															</TextBlock>
 														</StackPanel>
-													</Border>
-												</DataTemplate>
-											</ItemsControl.ItemTemplate>
-										</ItemsControl>
-										<StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
-											<Button Background="Red" HorizontalAlignment="Center" Click="RemoveDirectoryBtn">
-												<TextBlock FontSize="12" FontWeight="Bold">Remove directory</TextBlock>
-											</Button>
-											<Button HorizontalAlignment="Center" Click="AddTriggerBtn">
-												<TextBlock FontSize="12" FontWeight="Bold">Add a trigger</TextBlock>
-											</Button>
+													</DataTemplate>
+												</ItemsControl.ItemTemplate>
+											</ItemsControl>
 										</StackPanel>
-									</StackPanel>
-								</Border>
+									</Border>
+									<Border BorderBrush="{DynamicResource TurretBlue}" Background="{DynamicResource BackgroundBrush}" BorderThickness="1" CornerRadius="3" Margin="5" Padding="5">
+										<StackPanel Orientation="Vertical">
+											<StackPanel Orientation="Horizontal" Margin="5" Spacing="3">
+												<TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold" Margin="0,0,5,0">Directory:</TextBlock>
+												<TextBox VerticalAlignment="Center" FontSize="13" Width="250" Text="{Binding Path=DirectoryPath}"  PropertyChanged="HandlePropertyChanged"/>
+												<Button Click="BrowseForDirectoryBtn">
+													<TextBlock FontSize="12" FontWeight="Bold">Browse...</TextBlock>
+												</Button>
+											</StackPanel>
+											<StackPanel Orientation="Horizontal" Margin="5">
+												<TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold" Margin="0,0,5,0">File pattern:</TextBlock>
+												<TextBox FontSize="13" Width="317" Text="{Binding Path=FilePattern}"  PropertyChanged="HandlePropertyChanged"/>
+											</StackPanel>
+											<TextBlock FontSize="12" FontWeight="Bold" Margin="5" HorizontalAlignment="Center">Triggers</TextBlock>
+											<ItemsControl Name="TriggersFileControl" ItemsSource="{Binding Path=ShockTriggers}">
+												<ItemsControl.ItemTemplate>
+													<DataTemplate>
+														<Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="3" Margin="5" Padding="5">
+															<StackPanel Orientation="Vertical">
+																<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+																	<TextBlock FontSize="12" FontWeight="Bold" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Center">Line trigger mode:</TextBlock>
+																	<ComboBox FontSize="13" SelectedIndex="{Binding Path=TriggerMode}" PropertyChanged="HandlePropertyChanged">
+																		<ComboBox.Items>
+																			<ComboBoxItem Content="Contains"/>
+																			<ComboBoxItem Content="Starts with" />
+																			<ComboBoxItem Content="Ends with" />
+																			<ComboBoxItem Content="Regex" />
+																		</ComboBox.Items>
+																	</ComboBox>
+																</StackPanel>
+																<StackPanel Orientation="Horizontal" Margin="5" HorizontalAlignment="Center">
+																	<TextBlock FontSize="12" FontWeight="Bold" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Center">Trigger:</TextBlock>
+																	<TextBox FontSize="13" Width="300" Text="{Binding Path=TriggerText}"  PropertyChanged="HandlePropertyChanged"/>
+																</StackPanel>
+																<Button Background="Red" HorizontalAlignment="Center" Click="RemoveTriggerBtn">
+																	<TextBlock FontSize="12" FontWeight="Bold">Remove</TextBlock>
+																</Button>
+															</StackPanel>
+														</Border>
+													</DataTemplate>
+												</ItemsControl.ItemTemplate>
+											</ItemsControl>
+											<StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+												<Button Background="Red" HorizontalAlignment="Center" Click="RemoveDirectoryBtn">
+													<TextBlock FontSize="12" FontWeight="Bold">Remove directory</TextBlock>
+												</Button>
+												<Button HorizontalAlignment="Center" Click="AddTriggerBtn">
+													<TextBlock FontSize="12" FontWeight="Bold">Add a trigger</TextBlock>
+												</Button>
+											</StackPanel>
+										</StackPanel>
+									</Border>
+								</StackPanel>
 							</DataTemplate>
 						</ItemsControl.ItemTemplate>
 						<ItemsControl.ItemsPanel>
