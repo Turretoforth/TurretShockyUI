@@ -53,13 +53,13 @@
 				</StackPanel>
 			</WrapPanel>
 			<TextBlock HorizontalAlignment="Center" FontSize="15" FontWeight="Bold">Logs</TextBlock>
-			<ItemsControl ItemsSource="{Binding LogEntries}" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+				<ItemsControl ItemsSource="{Binding LogEntries}" HorizontalAlignment="Stretch" VerticalAlignment="Top">
 				<ItemsControl.ItemsPanel>
 					<ItemsPanelTemplate>
 						<StackPanel Orientation="Vertical"
 									HorizontalAlignment="Stretch"
 									VerticalAlignment="Top"
-									Height="260" Background="Black"/>
+									Height="292" Background="Black"/>
 					</ItemsPanelTemplate>
 				</ItemsControl.ItemsPanel>
 				<ItemsControl.ItemTemplate>
@@ -71,7 +71,7 @@
 						</SelectableTextBlock>
 					</DataTemplate>
 				</ItemsControl.ItemTemplate>
-			</ItemsControl>
+			</ItemsControl>			
 			<TextBlock HorizontalAlignment="Center" FontSize="15" FontWeight="Bold">Session stats</TextBlock>
 			<WrapPanel Orientation="Horizontal" HorizontalAlignment="Center">
 				<StackPanel Orientation="Horizontal" Margin="0,0,10,0">

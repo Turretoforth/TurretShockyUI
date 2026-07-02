@@ -57,7 +57,7 @@ namespace TurretShocky.Models
             }
         }
 
-        private int _oscListenerPort = 9001;
+        private int _oscListenerPort = 9000;
         public int OscListenerPort
         {
             get => _oscListenerPort;
@@ -67,7 +67,7 @@ namespace TurretShocky.Models
             }
         }
 
-        private int _oscSenderPort = 9000;
+        private int _oscSenderPort = 9001;
         public int OscSenderPort
         {
             get => _oscSenderPort;
@@ -90,8 +90,8 @@ namespace TurretShocky.Models
         {
             WatchFiles = true;
             CooldownBehaviour = CooldownBehaviour.Ignore;
-            OscListenerPort = 9001;
-            OscSenderPort = 9000;
+            OscListenerPort = 9000;
+            OscSenderPort = 9001;
             FilesSettings =
             [
                 new() {
