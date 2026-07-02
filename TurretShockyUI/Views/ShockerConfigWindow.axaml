@@ -6,7 +6,8 @@
         x:Class="TurretShocky.ShockerConfigWindow"
         Icon="/Assets/Shocky.ico"
         Title="TurretShocky - Shocker config"
-        Width="390" Height="270">
+        Width="390" Height="270"
+		CanResize="False">
   <StackPanel Orientation="Vertical">
     <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10">
       <Grid.RowDefinitions>

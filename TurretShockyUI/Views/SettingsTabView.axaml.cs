@@ -14,40 +14,6 @@ public partial class SettingsTabView : UserControl
         InitializeComponent();
     }
 
-    private void RemoveTriggerBtn(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        if (sender is Button button && button.DataContext is ShockTrigger trigger)
-        {
-            ItemsControl? parent = button.FindAncestorOfType<ItemsControl>();
-            if (parent != null && parent.ItemsSource is ObservableCollection<ShockTrigger> collection)
-            {
-                collection.Remove(trigger);
-
-                // Update the IDs of the remaining triggers
-                for (int i = 0; i < collection.Count; i++)
-                {
-                    collection[i].Id = (uint)i;
-                }
-                SaveParameters();
-            }
-        }
-    }
-
-    private void AddTriggerBtn(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        if (sender is Button button && button.DataContext is FileSettings filesSettings && filesSettings.ShockTriggers is ObservableCollection<ShockTrigger> collection)
-        {
-            ShockTrigger newTrigger = new()
-            {
-                Id = (uint)collection.Count,
-                TriggerText = string.Empty,
-                TriggerMode = TriggerMode.Contains
-            };
-            collection.Add(newTrigger);
-            SaveParameters();
-        }
-    }
-
     private void AddDirectoryBtn(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         if (sender is Button button && button.DataContext is MainWindowViewModel vm && vm.Prefs.App.FilesSettings is ObservableCollection<FileSettings> collection)
@@ -77,24 +43,17 @@ public partial class SettingsTabView : UserControl
         }
     }
 
-    private void BrowseForDirectoryBtn(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private void EditDirectoryBtn(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         if (sender is Button button && button.DataContext is FileSettings filesSettings)
         {
-            var window = TopLevel.GetTopLevel(this) as Window;
-            window!.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
-            {
-                Title = "Select Directory",
-                AllowMultiple = false
-            }).ContinueWith(task =>
-            {
-                if (task.Result != null && task.Result.Count > 0)
-                {
-                    filesSettings.DirectoryPath = task.Result[0].TryGetLocalPath() ?? string.Empty;
-                }
-            });
+            Window? window = TopLevel.GetTopLevel(this) as Window;
+            // Open a dialog to edit the directory settings
+            FileTriggerDirectoryDialog dialog = new(filesSettings);
+            dialog.ShowDialog(window!);
         }
     }
+
     private void SaveParameters()
     {
         Dispatcher.Invoke(() =>
@@ -104,9 +63,11 @@ public partial class SettingsTabView : UserControl
             (DataContext as MainWindowViewModel)!.Prefs.App = appSettings;
         });
     }
+
     private void HandlePropertyChanged(object? sender, Avalonia.AvaloniaPropertyChangedEventArgs e)
     {
         if (DataContext != null)
             SaveParameters();
     }
+
 }
