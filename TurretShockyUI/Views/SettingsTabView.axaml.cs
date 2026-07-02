@@ -50,7 +50,9 @@ public partial class SettingsTabView : UserControl
             Window? window = TopLevel.GetTopLevel(this) as Window;
             // Open a dialog to edit the directory settings
             FileTriggerDirectoryDialog dialog = new(filesSettings);
-            dialog.ShowDialog(window!);
+            dialog.ShowDialog(window!).ContinueWith(
+                d => SaveParameters() // Trigger save to not lose changes
+            );
         }
     }
 
