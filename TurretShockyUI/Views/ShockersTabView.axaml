@@ -1,0 +1,100 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:TurretShocky.ViewModels"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:local="using:TurretShocky.Models"
+			 mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="560"
+			 x:Class="TurretShocky.Views.ShockersTabView"
+			 x:DataType="vm:MainWindowViewModel">
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE -->
+		<vm:DesignMainWindowViewModel/>
+	</Design.DataContext>
+	<ScrollViewer>
+		<StackPanel Margin="8" Orientation="Vertical" Spacing="5">
+			<TextBlock HorizontalAlignment="Center" FontSize="15" FontWeight="Bold">Shockers</TextBlock>
+			<WrapPanel HorizontalAlignment="Center">
+				<Button Name="NewShockerBtn" Margin="2" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" Click="OnEditOrCreateShockerBtnClick">
+					<TextBlock>Add a shocker</TextBlock>
+				</Button>
+				<Button Margin="2" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" Click="OnConfigureApiBtnClick" IsEnabled="{Binding !IsOscEnabled}">
+					<StackPanel Orientation="Horizontal">
+						<PathIcon Data="{StaticResource options_regular}" Margin="0,0,6,0"></PathIcon>
+						<TextBlock VerticalAlignment="Center">Configure API</TextBlock>
+					</StackPanel>
+				</Button>
+				<CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0,0,0" Padding="5" IsChecked="{Binding RouletteMode}">
+					<TextBlock FontSize="14">Roulette Mode</TextBlock>
+				</CheckBox>
+			</WrapPanel>
+			<ItemsControl ItemsSource="{Binding Prefs.Shockers}" Padding="5">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<WrapPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<Border Margin="5" BorderBrush="{DynamicResource TurretBlue}" BorderThickness="2" CornerRadius="3" Padding="8">
+							<StackPanel Orientation="Vertical" VerticalAlignment="Center" Spacing="2">
+								<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
+									<TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontWeight="Bold"/>
+									<Button Name="{Binding Uid}" HorizontalAlignment="Center" Background="Red" Click="DeleteShockerBtn">
+										<StackPanel Orientation="Horizontal">
+											<PathIcon Data="{StaticResource delete_regular}" Height="11"/>
+										</StackPanel>
+									</Button>
+								</StackPanel>
+								<TextBlock Text="{Binding Type}" HorizontalAlignment="Center" FontSize="11" FontWeight="Bold"></TextBlock>
+								<CheckBox Name="{Binding Uid}" HorizontalAlignment="Center" IsChecked="{Binding IsEnabled}" FontSize="14" Click="ShockerEnableClick">Enabled</CheckBox>
+								<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="2">
+									<Button Name="{Binding Uid}" HorizontalAlignment="Center" Click="OnTestShockerBtnClick">
+										<StackPanel Orientation="Horizontal">
+											<PathIcon Data="{StaticResource phone_vibrate_regular}" Height="11" Margin="0,0,4,0"/>
+											<TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold">Test</TextBlock>
+										</StackPanel>
+									</Button>
+									<Button Name="{Binding Uid}" HorizontalAlignment="Center" Click="OnEditOrCreateShockerBtnClick">
+										<StackPanel Orientation="Horizontal">
+											<PathIcon Data="{StaticResource edit_regular}" Height="11" Margin="0,0,4,0"/>
+											<TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold">Edit</TextBlock>
+										</StackPanel>
+									</Button>
+								</StackPanel>
+								<CheckBox Name="{Binding Uid}" HorizontalAlignment="Center" Click="ShockerSelectClick" FontSize="14">Select</CheckBox>
+								<TextBlock IsVisible="{Binding Overrides?.Count, TargetNullValue=False}" HorizontalAlignment="Center" Foreground="Coral" FontWeight="Bold" FontSize="10" TextWrapping="Wrap">
+									<Run Text="{Binding Overrides?.Count, TargetNullValue=0}"/>
+									<Run Text="override(s)" FontSize="9"/>
+								</TextBlock>
+							</StackPanel>
+						</Border>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+			<TextBlock HorizontalAlignment="Center" FontSize="15" FontWeight="Bold">Overrides</TextBlock>
+			<TextBlock Name="TextOverride" HorizontalAlignment="Center" FontSize="13">Select one or several shockers to edit their overrides</TextBlock>
+			<Border Name="OverrideSection" IsVisible="False" BorderBrush="{DynamicResource TurretBlue}" BorderThickness="2" CornerRadius="3" Padding="8">
+				<StackPanel Orientation="Vertical" VerticalAlignment="Center" Spacing="5">
+					<StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="4">
+						<CheckBox Name="OverrideDuration" IsCheckedChanged="OverrideDuration_IsCheckedChanged">Duration: Force to</CheckBox>
+						<ComboBox Name="OverrideDurationValue" SelectionChanged="OverrideDurationValue_SelectionChanged" FontSize="13" IsEnabled="False">
+						</ComboBox>
+						<TextBlock VerticalAlignment="Center" FontSize="13">seconds</TextBlock>
+						<ComboBox Name="OverrideDurationMode" SelectionChanged="OverrideDurationMode_SelectionChanged" FontSize="13" IsEnabled="False">
+						</ComboBox>
+					</StackPanel>
+					<StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="4">
+						<CheckBox Name="OverrideIntensity" IsCheckedChanged="OverrideIntensity_IsCheckedChanged">Intensity: Force to</CheckBox>
+						<ComboBox Name="OverrideIntensityValue" SelectionChanged="OverrideIntensityValue_SelectionChanged" FontSize="13" IsEnabled="False">
+						</ComboBox>
+						<TextBlock VerticalAlignment="Center" FontSize="13">%</TextBlock>
+						<ComboBox Name="OverrideIntensityMode" SelectionChanged="OverrideIntensityMode_SelectionChanged" FontSize="13" IsEnabled="False">
+						</ComboBox>
+					</StackPanel>
+					<Button HorizontalAlignment="Center" Margin="0,10,0,0" Name="SaveOverridesBtn" Click="SaveOverridesBtn_Click"><TextBlock>Save overrides</TextBlock></Button>
+				</StackPanel>
+			</Border>
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>

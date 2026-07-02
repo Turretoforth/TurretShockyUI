@@ -1,7 +1,6 @@
 ﻿using Avalonia.Media;
 using System;
 using System.Collections.ObjectModel;
-using System.Reflection;
 using TurretShocky.Models;
 
 namespace TurretShocky.ViewModels
@@ -10,7 +9,7 @@ namespace TurretShocky.ViewModels
     {
         private ObservableCollection<LogEntry> _logEntries = [];
         private ShockyPrefs _prefs = new();
-        private bool _isOscButtonEnabled = true;
+        private bool _isOscEnabled = false;
         private uint _nbShocks = 0;
         private uint _nbtouches = 0;
         private uint _timesTriggered = 0;
@@ -31,10 +30,10 @@ namespace TurretShocky.ViewModels
             set { SetProperty(ref _prefs, value); }
         }
 
-        public bool IsOscButtonEnabled
+        public bool IsOscEnabled
         {
-            get { return _isOscButtonEnabled; }
-            set { SetProperty(ref _isOscButtonEnabled, value); }
+            get { return _isOscEnabled; }
+            set { SetProperty(ref _isOscEnabled, value); }
         }
 
         public uint NbShocks
@@ -95,7 +94,7 @@ namespace TurretShocky.ViewModels
         {
             LogEntries = [];
             Prefs = new ShockyPrefs();
-            IsOscButtonEnabled = true;
+            IsOscEnabled = false;
             NbShocks = 0;
             NbTouches = 0;
             TimesTriggered = 0;
@@ -107,10 +106,10 @@ namespace TurretShocky.ViewModels
 
         public void AddLog(string message, Color color)
         {
-            LogEntries.Add(new LogEntry($"[{DateTime.Now:HH:mm:ss}] {message}", color));
+            LogEntries.Insert(0,new LogEntry($"[{DateTime.Now:HH:mm:ss}] {message}", color));
             if (LogEntries.Count > 10)
             {
-                LogEntries.RemoveAt(0);
+                LogEntries.RemoveAt(LogEntries.Count - 1);
             }
         }
     }

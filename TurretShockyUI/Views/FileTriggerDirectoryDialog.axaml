@@ -1,0 +1,64 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:vm="using:TurretShocky.ViewModels"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:local="using:TurretShocky"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:models="using:TurretShocky.Models"
+		mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="500"
+		Width="700" Height="500"
+        Icon="/Assets/Shocky.ico"
+        Title="TurretShocky - File trigger edit"
+		x:Class="TurretShocky.FileTriggerDirectoryDialog"
+		x:DataType="models:FileSettings"
+		CanResize="False">
+	<ScrollViewer>
+		<StackPanel Orientation="Vertical" HorizontalAlignment="Center" Spacing="3">
+			<StackPanel Orientation="Horizontal" Margin="5" Spacing="3">
+				<TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold" Margin="0,0,5,0">Directory:</TextBlock>
+				<TextBox VerticalAlignment="Center" FontSize="13" Width="350" Text="{Binding Path=DirectoryPath}"/>
+				<Button Click="BrowseForDirectoryBtn">
+					<TextBlock FontSize="12" FontWeight="Bold">Browse...</TextBlock>
+				</Button>
+			</StackPanel>
+			<StackPanel Orientation="Horizontal" Margin="5">
+				<TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold" Margin="0,0,5,0">File pattern:</TextBlock>
+				<TextBox FontSize="13" Width="317" Text="{Binding Path=FilePattern}"/>
+			</StackPanel>
+			<TextBlock FontSize="12" FontWeight="Bold" Margin="5" HorizontalAlignment="Center">Triggers</TextBlock>
+			<ItemsControl Name="TriggersFileControl" ItemsSource="{Binding Path=ShockTriggers}">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="3" Margin="5" Padding="5">
+							<StackPanel Orientation="Vertical">
+								<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+									<TextBlock FontSize="12" FontWeight="Bold" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Center">Line trigger mode:</TextBlock>
+									<ComboBox FontSize="13" SelectedIndex="{Binding Path=TriggerMode}">
+										<ComboBox.Items>
+											<ComboBoxItem Content="Contains"/>
+											<ComboBoxItem Content="Starts with" />
+											<ComboBoxItem Content="Ends with" />
+											<ComboBoxItem Content="Regex" />
+										</ComboBox.Items>
+									</ComboBox>
+								</StackPanel>
+								<StackPanel Orientation="Horizontal" Margin="5" HorizontalAlignment="Center">
+									<TextBlock FontSize="12" FontWeight="Bold" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Center">Trigger:</TextBlock>
+									<TextBox FontSize="13" Width="300" Text="{Binding Path=TriggerText}"/>
+								</StackPanel>
+								<Button Background="Red" HorizontalAlignment="Center" Click="RemoveTriggerBtn">
+									<TextBlock FontSize="12" FontWeight="Bold">Remove</TextBlock>
+								</Button>
+							</StackPanel>
+						</Border>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+			<StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+				<Button HorizontalAlignment="Center" Click="AddTriggerBtn">
+					<TextBlock FontSize="12" FontWeight="Bold">Add a trigger</TextBlock>
+				</Button>
+			</StackPanel>
+		</StackPanel>
+	</ScrollViewer>
+</Window>

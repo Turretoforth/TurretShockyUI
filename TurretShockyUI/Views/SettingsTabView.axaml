@@ -1,0 +1,131 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:TurretShocky.ViewModels"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:local="using:TurretShocky.Models"
+			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 x:Class="TurretShocky.Views.SettingsTabView"
+			 x:DataType="vm:MainWindowViewModel">
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE -->
+		<vm:DesignMainWindowViewModel/>
+	</Design.DataContext>
+	<ScrollViewer VerticalScrollBarVisibility="Auto">
+		<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+			<TextBlock HorizontalAlignment="Center" FontSize="18" FontWeight="Bold">Settings</TextBlock>
+			<TextBlock HorizontalAlignment="Center" FontSize="12" FontWeight="Bold">All changes are saved automatically</TextBlock>
+			<Border Margin="10" BorderThickness="1" BorderBrush="{DynamicResource TurretBlue}" CornerRadius="5" Width="450" Padding="5">
+				<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+					<TextBlock FontSize="16" FontWeight="Bold" HorizontalAlignment="Center">General</TextBlock>
+					<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5" Margin="0,0,0,5">
+						<TextBlock FontSize="13" VerticalAlignment="Center">OSC Listener Port (default 9000)</TextBlock>
+						<TextBox Text="{Binding Prefs.App.OscListenerPort}" FontSize="13" Width="60" PropertyChanged="HandlePropertyChanged"/>
+					</StackPanel>
+					<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5">
+						<TextBlock FontSize="13" VerticalAlignment="Center">OSC Sending Port (default 9001)</TextBlock>
+						<TextBox Text="{Binding Prefs.App.OscSenderPort}" FontSize="13" Width="60" PropertyChanged="HandlePropertyChanged"/>
+					</StackPanel>
+					<CheckBox Name="ExtraOscMessages" Margin="10" IsChecked="{Binding Prefs.App.ShowExtraOscMessages}" HorizontalAlignment="Center" PropertyChanged="HandlePropertyChanged">
+						<TextBlock FontSize="13" Text="Show extra OSC messages received by the program"></TextBlock>
+					</CheckBox>
+					<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+						<TextBlock FontSize="13" Margin="0,0,5,0" VerticalAlignment="Center">Delay between trigger and shock/vibrate:</TextBlock>
+						<ComboBox SelectedIndex="{Binding Path=Prefs.App.DelayTrigger}" FontSize="13" PropertyChanged="HandlePropertyChanged">
+							<ComboBox.Items>
+								<ComboBoxItem Content="0" />
+								<ComboBoxItem Content="1" />
+								<ComboBoxItem Content="2" />
+								<ComboBoxItem Content="3" />
+								<ComboBoxItem Content="4" />
+								<ComboBoxItem Content="5" />
+							</ComboBox.Items>
+						</ComboBox>
+						<TextBlock FontSize="13" Margin="5,0,5,0" VerticalAlignment="Center">second(s)</TextBlock>
+					</StackPanel>
+				</StackPanel>
+			</Border>
+			<Border Margin="10" BorderThickness="1" BorderBrush="{DynamicResource TurretBlue}" CornerRadius="5" Width="450" Padding="5">
+				<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+					<TextBlock FontSize="16" FontWeight="Bold" HorizontalAlignment="Center">Text file triggers</TextBlock>
+					<CheckBox Name="WatchFiles" Margin="10" IsChecked="{Binding Prefs.App.WatchFiles}" HorizontalAlignment="Center" PropertyChanged="HandlePropertyChanged">
+						<TextBlock FontSize="13" Text="Enable text file triggers"></TextBlock>
+					</CheckBox>
+					<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+						<TextBlock FontSize="13" Margin="0,0,5,0" VerticalAlignment="Center">Behaviour when on cooldown:</TextBlock>
+						<ComboBox SelectedIndex="{Binding Path=Prefs.App.CooldownBehaviour}" FontSize="13" PropertyChanged="HandlePropertyChanged">
+							<ComboBox.Items>
+								<ComboBoxItem Content="Ignore" />
+								<ComboBoxItem Content="Queue" />
+							</ComboBox.Items>
+						</ComboBox>
+					</StackPanel>
+					<TextBlock FontSize="13" FontWeight="Bold" HorizontalAlignment="Center">Files</TextBlock>
+					<ItemsControl Name="FilesSettingsControl" ItemsSource="{Binding Prefs.App.FilesSettings}">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<StackPanel>
+									<Border BorderBrush="{DynamicResource TurretBlue}" Background="{DynamicResource BackgroundBrush}" BorderThickness="1" CornerRadius="3" Margin="5" Padding="5">
+										<StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+											<StackPanel Spacing="5" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+												<TextBlock MaxWidth="280" TextTrimming="PathSegmentEllipsis" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">
+													<Run FontWeight="Bold">Directory:</Run>
+													<Run Text="{Binding Path=DirectoryPath}" />
+												</TextBlock>
+												<Button VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="12" Click="EditDirectoryBtn">
+													<StackPanel Orientation="Horizontal">
+														<PathIcon Data="{StaticResource edit_regular}" Height="11" Margin="0,0,4,0"/>
+														<TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="Bold">Edit</TextBlock>
+													</StackPanel>
+												</Button>
+												<Button VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="13" Background="Red" Click="RemoveDirectoryBtn">
+													<StackPanel Orientation="Horizontal">
+														<PathIcon Data="{StaticResource delete_regular}" Height="14"/>
+													</StackPanel>
+												</Button>
+											</StackPanel>
+											<TextBlock FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">
+												<Run FontWeight="Bold">File pattern:</Run>
+												<Run Text="{Binding Path=FilePattern}" />
+											</TextBlock>
+											<StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="5">
+												<CheckBox Name="FileEnabled" Margin="5" IsChecked="{Binding Path=IsEnabled}" HorizontalAlignment="Center" PropertyChanged="HandlePropertyChanged">
+													<TextBlock FontSize="13" Text="Enabled"></TextBlock>
+												</CheckBox>
+											</StackPanel>
+												<TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="13" FontWeight="Bold">Triggers</TextBlock>
+											<ItemsControl Name="TriggersFileDisplayControl" ItemsSource="{Binding Path=ShockTriggers}">
+												<ItemsControl.ItemTemplate>
+													<DataTemplate>
+														<StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="5">
+															<TextBlock FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">
+																<Run FontWeight="Bold">Mode:</Run>
+																<Run Text="{Binding Path=TriggerMode}" />
+															</TextBlock>
+															<TextBlock FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">
+																<Run FontWeight="Bold">Text:</Run>
+																<Run Text="{Binding Path=TriggerText}" />
+															</TextBlock>
+														</StackPanel>
+													</DataTemplate>
+												</ItemsControl.ItemTemplate>
+											</ItemsControl>
+										</StackPanel>
+									</Border>
+								</StackPanel>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+						<ItemsControl.ItemsPanel>
+							<ItemsPanelTemplate>
+								<StackPanel Margin="5" />
+							</ItemsPanelTemplate>
+						</ItemsControl.ItemsPanel>
+					</ItemsControl>
+					<Button HorizontalAlignment="Center" Click="AddDirectoryBtn">
+						<TextBlock FontSize="12" FontWeight="Bold">Add a directory</TextBlock>
+					</Button>
+				</StackPanel>
+			</Border>
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>
