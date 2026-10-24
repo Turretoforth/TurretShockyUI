@@ -65,9 +65,12 @@ namespace TurretShocky.Views
                     return;
                 }
 
-                if ((DataContext as MainWindowViewModel)!.Prefs.Api.ApiKey == string.Empty || (DataContext as MainWindowViewModel)!.Prefs.Api.Username == string.Empty)
+                bool pishockInfoEntered = (DataContext as MainWindowViewModel)!.Prefs.Api.ApiKey != string.Empty && (DataContext as MainWindowViewModel)!.Prefs.Api.Username != string.Empty;
+                bool openshockInfoEntered = (DataContext as MainWindowViewModel)!.Prefs.Api.OpenShockBaseApi != string.Empty && (DataContext as MainWindowViewModel)!.Prefs.Api.OpenShockApiToken != string.Empty;
+
+                if (!pishockInfoEntered && !openshockInfoEntered)
                 {
-                    AddLog("Please configure the API key and username first", Colors.Red);
+                    AddLog("Please configure the PiShock and/or OpenShock API first", Colors.Red);
                     (DataContext as MainWindowViewModel)!.IsOscEnabled = false;
                     return;
                 }
